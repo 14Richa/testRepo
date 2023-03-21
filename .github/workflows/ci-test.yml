@@ -1,9 +1,8 @@
 name: Welcome New Contributor
 on:
   pull_request:
-    types: [opened]
-      paths:
-        - 'TSC_MEMBERS.json' 
+    paths:
+      - 'TSC_MEMBERS.json' 
 jobs:
   welcome:
     if: github.event.pull_request.merged 
