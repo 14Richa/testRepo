@@ -2,7 +2,7 @@ name: Welcome New Contributor
 on:
   pull_request:
     paths:
-      - 'TSC_MEMBERS.json' 
+      - '../TSC_MEMBERS.json' 
 jobs:
   welcome:
     if: github.event.pull_request.merged 
