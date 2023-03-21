@@ -38,7 +38,6 @@ jobs:
             console.log("Removed members:", removed);
       - name: Display welcome message
         if: ${{ steps.compare-files.outputs.added == 'true' }}
-        runs-on: ubuntu-latest
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.SECRET_TOKEN }}
