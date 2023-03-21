@@ -40,7 +40,7 @@ jobs:
         if: ${{ steps.compare-files.outputs.added == 'true' }}
         uses: actions/github-script@v3
         with:
-          github-token: ${{ secrets.SECRET_TOKEN }}
+          github-token: ${{ secrets.TEST_TOKEN }}
           script: |
             const welcomeMessage = `Welcome to AsyncAPI. Thanks a lot for reporting your first issue. Please check out our [contributors guide](https://github.com/asyncapi/community/blob/master/CONTRIBUTING.md) and the instructions about a [basic recommended setup](https://github.com/asyncapi/community/blob/master/git-workflow.md) useful for opening a pull request.<br />Keep in mind there are also other channels you can use to interact with AsyncAPI community.`;
             const { owner, repo } = context.repo;
