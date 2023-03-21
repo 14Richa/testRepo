@@ -42,7 +42,7 @@ jobs:
         with:
           github-token: ${{ secrets.TEST_TOKEN }}
           script: |
-            const welcomeMessage = `Welcome to AsyncAPI. Thanks a lot for reporting your first issue. Please check out our [contributors guide](https://github.com/asyncapi/community/blob/master/CONTRIBUTING.md) and the instructions about a [basic recommended setup](https://github.com/asyncapi/community/blob/master/git-workflow.md) useful for opening a pull request.<br />Keep in mind there are also other channels you can use to interact with AsyncAPI community.`;
+            const welcomeMessage = `Welcome to AsyncAPI. Thanks a lot for creating your first pull request. Please check out our [contributors guide](https://github.com/asyncapi/community/blob/master/CONTRIBUTING.md) useful for opening a pull request.<br />Keep in mind there are also other channels you can use to interact with AsyncAPI community.`;
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
             return github.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
