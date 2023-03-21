@@ -1,7 +1,8 @@
 name: Welcome New Contributor
 on:
-  pull_request:
-    [opened]
+  pull_request_target:
+    types: 
+      - opened
     # paths:
     #   - './TSC_MEMBERS.json' 
 jobs:
