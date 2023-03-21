@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [opened]
     paths: 
-      - '**.json'
+      - 'TSC_MEMBERS.json'
 jobs:
   welcome:
     # if: github.event.pull_request.merged 
