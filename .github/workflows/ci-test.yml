@@ -1,50 +1,4 @@
-# name: Welcome New Contributor
-# on:
-#   pull_request:
-#     types: [opened]
-#     paths: 
-#       - 'TSC_MEMBERS.json'
-# jobs:
-#   welcome:
-#     runs-on: ubuntu-latest
-#     steps: 
-#       - name: Checkout main branch 
-#         uses: actions/checkout@v2
-#         with:
-#           ref: main
-#       - name: Save file from main branch 
-#         run: cp TSC_MEMBERS.json $HOME
-#       - name: Checkout other branch
-#         uses: actions/checkout@v2
-#         with: 
-#           ref: ${{github.event.inputs.branch}}
-#       - name: Compare files
-#         id: compare-files
-#         uses: actions/github-script@v4
-#         with:
-#           script: |
-#             const fs = require("fs");
-#             const main_file = JSON.parse(fs.readFileSync(`${process.env.HOME}/TSC_MEMBERS.json`));
-#             const new_file = JSON.parse(fs.readFileSync('TSC_MEMBERS.json'));
-#             const added = new_file.filter(
-#               (newObj) => !main_file.some((oldObj) => oldObj.name === newObj.name)
-#             );
-#             const removed = main_file.filter(
-#               (oldObj) => !new_file.some((newObj) => newObj.name === oldObj.name)
-#             );
-#             if(added.length > 0)  console.log(`::set-output name=added::true`);
-#             if(removed.length > 0) console.log(`::set-output name=removed::true`);           
-#       - name: Display welcome message
-#         if: ${{steps.compare-files.outputs.added == 'true'}}
-#         uses: actions/github-script@v3
-#         with:
-#           github-token: ${{ secrets.BOT_TOKEN }}
-#           script: |
-#             const welcomeMessage = `Welcome!!`;
-#             const { owner, repo } = context.repo;
-#             const { number: issue_number } = context.issue;
-#             return github.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
-
+name: Welcome New Contributor
 
 on:
   pull_request:
@@ -93,10 +47,7 @@ jobs:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             const newContributors = `@${{steps.compare-files.outputs.added}}`.split(",");
-            const welcomeMessage = `Welcome ${newContributors.map((contributor) => `${contributor}`).join(", ")}!!`;
+            const welcomeMessage = `Welcome ${newContributors.map((contributor) => `@${contributor}`).join(", ")}!!`;
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
             return github.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
-
-
-
