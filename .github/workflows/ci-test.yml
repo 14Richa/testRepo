@@ -44,6 +44,9 @@ jobs:
           github-token: ${{ secrets.TEST_TOKEN }}
           script: |
             const welcomeMessage = `Welcome to AsyncAPI. Thanks a lot for creating your first pull request. Please check out our [contributors guide](https://github.com/asyncapi/community/blob/master/CONTRIBUTING.md) useful for opening a pull request.<br />Keep in mind there are also other channels you can use to interact with AsyncAPI community.`;
-            const { owner, repo } = context.repo;
-            const { number: issue_number } = context.issue;
-            return github.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
+            await github.issues.createComment({
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              issue_number: issueNumber,
+              body: welcomeMessage
+            });
