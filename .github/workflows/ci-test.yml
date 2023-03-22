@@ -45,6 +45,7 @@
 #             const { number: issue_number } = context.issue;
 #             return github.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
 
+
 name: Welcome New Contributor
 
 on:
@@ -89,9 +90,10 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const newContributor = `@${steps.compare-files.outputs.added}`;
+            const newContributor = `@${{steps.compare-files.outputs.added}}`;
             const welcomeMessage = `Welcome ${newContributor}!!`;
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
             return github.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
+
 
