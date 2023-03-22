@@ -52,5 +52,27 @@
 		"repos": [
 			"cupid"
 		]
-	}		
+	},
+	{
+		"name": "Richa",
+		"github": "14Richa",
+		"linkedin": "richss",
+		"slack": "U01QX79S734",
+		"twitter": "Ar7",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
+	},
+	{
+		"name": "Alex",
+		"github": "aleg07",
+		"linkedin": "arjungarg17",
+		"slack": "U01QX79S734",
+		"twitter": "vfh",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
+	}				
 ]
