@@ -24,10 +24,10 @@ jobs:
           # Read in the contents of both files
           main_file=$(cat $HOME/TSC_MEMBERS.json)
           new_file=$(cat TSC_MEMBERS.json)
-          const added = newMembers.filter(
+          const added = new_file.filter(
             (newObj) => !main_file.some((oldObj) => oldObj.name === newObj.name)
           );
-          const removed = origMembers.filter(
+          const removed = main_file.filter(
             (oldObj) => !new_file.some((newObj) => newObj.name === oldObj.name)
           );
           if(added.length > 0)  console.log(`::set-output name=added::true`);
