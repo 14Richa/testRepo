@@ -40,7 +40,7 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const addedUsers = JSON.parse('${{ steps.compare-files.outputs.added }}');
+            const addedUsers = JSON.parse(`${{ steps.compare-files.outputs.added }}`);
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
             let welcomeMessage = "Welcome to our team!\n\n";
