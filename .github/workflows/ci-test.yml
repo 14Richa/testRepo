@@ -6,7 +6,6 @@ on:
       - 'TSC_MEMBERS.json'
 jobs:
   welcome:
-    # if: github.event.pull_request.merged 
     runs-on: ubuntu-latest
     steps: 
       - name: Checkout main branch 
@@ -20,10 +19,16 @@ jobs:
         with: 
           ref: ${{github.event.inputs.branch}}
       - name: Compare files
-        run: diff $HOME/TSC_MEMBERS.json TSC_MEMBERS.json
         id: compare-files
+        run: |
+          # Read in the contents of both files
+          main_file=$(cat $HOME/TSC_MEMBERS.json)
+          other_file=$(cat TSC_MEMBERS.json)
+          if [[ "$main_file" != "$other_file" ]]; then
+            echo "::set-output name=modified::true"
+          fi
       - name: Display welcome message
-        if: steps.compare-files.outputs.exit-code != '0'
+        if: steps.compare-files.outputs.modified == 'true'
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
