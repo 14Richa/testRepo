@@ -20,9 +20,10 @@ jobs:
         with: 
           ref: ${{ github.event.inputs.branch }}
       - name: Compare files
-        if: steps.check-json.outputs.json-modified == '1' && ${diff $HOME/TSC_MEMBERS.json TSC_MEMBERS.json} != "0"
-        run: diff $HOME/TSC_MEMBERS.json TSC_MEMBERS.json
         id: compare-files
+        run: |
+          diff $HOME/TSC_MEMBERS.json TSC_MEMBERS.json
+          echo "::set-output name=exit-code::${?}"
       - name: Display welcome message
         if: steps.check-json.outputs.json-modified == '1' && steps.compare-files.outputs.exit-code != '0'
         uses: actions/github-script@v3
