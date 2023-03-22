@@ -41,6 +41,10 @@ jobs:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             const addedUsers = JSON.parse(`${{ steps.compare-files.outputs.added }}`);
+            if (!Array.isArray(addedUsers)) {
+              console.log("addedUsers is not an array");
+              return;
+            }
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
             let welcomeMessage = "Welcome to our team!\n\n";
