@@ -22,6 +22,7 @@ jobs:
       - name: Compare files
         id: compare-files
         run: |
+          ls -al $HOME
           diff $HOME/TSC_MEMBERS.json TSC_MEMBERS.json
           echo "::set-output name=exit-code::${?}"
       - name: Display welcome message
