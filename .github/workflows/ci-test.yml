@@ -1,12 +1,12 @@
 name: Welcome New Contributor
 on:
   pull_request:
-    types: [closed]
+    types: [opened, closed, reopened, merged]
     paths: 
       - 'TSC_MEMBERS.json'
 jobs:
   welcome:
-    if: github.event.pull_request.merged
+    if: github.event.pull_request.merged || github.event.pull_request.state == 'closed'
     runs-on: ubuntu-latest
     steps: 
       - name: Checkout main branch 
@@ -15,17 +15,21 @@ jobs:
           ref: main
       - name: Save file from main branch 
         run: cp TSC_MEMBERS.json $HOME
-      - name: Checkout other branch
+      - name: Checkout pull request branch
         uses: actions/checkout@v2
         with: 
-          ref: ${{github.event.inputs.branch}}
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: Compare files
         id: compare-files
         run: |
           # Read in the contents of both files
           main_file=$(cat $HOME/TSC_MEMBERS.json)
           other_file=$(cat TSC_MEMBERS.json)
-          if [[ "$main_file" != "$other_file" ]]; then
+          # Parse the JSON files
+          main_json=$(echo $main_file | jq '.[] | select(.github != null) | .github')
+          other_json=$(echo $other_file | jq '.[] | select(.github != null) | .github')
+          # Compare the JSON values
+          if [[ "$main_json" != "$other_json" ]]; then
             echo "::set-output name=modified::true"
           fi
       - name: Display welcome message
@@ -34,7 +38,7 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const welcomeMessage = `Welcome to AsyncAPI. Congratulation on the merge of your PR. Please check out our [contributors guide](https://github.com/asyncapi/community/blob/master/CONTRIBUTING.md) useful for opening a pull request.<br />Keep in mind there are also other channels you can use to interact with AsyncAPI community.`;
+            const welcomeMessage = `Welcome to AsyncAPI. Congratulations on the merge of your PR or the closing of your pull request. Please check out our [contributors guide](https://github.com/asyncapi/community/blob/master/CONTRIBUTING.md) useful for opening a pull request.<br />Keep in mind there are also other channels you can use to interact with AsyncAPI community.`;
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
             return github.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
