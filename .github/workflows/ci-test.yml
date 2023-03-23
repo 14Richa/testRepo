@@ -88,19 +88,19 @@ jobs:
             );
             if(added.length > 0) {
               core.info(`Added members: ${added.map((obj) => obj.name).join(",")}`);
-              core.setOutput("added", added.map((obj) => obj.name).join(","));
+              core.setOutput("removed_contributors", added.map((obj) => obj.name).join(","));
             }
             if(removed.length > 0) {
               core.info(`Removed members: true`);
               core.setOutput("removed", "true");
             }         
       - name: Display welcome message
-        # if: ${{ envAdded }}
+         if: steps.compare-files.outputs.added_contributors != ''
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const newContributors = `${{ env.ADDED_OUTPUT }}`.split(",");
+            const newContributors = `${{ steps.compare-files.outputs.added_contributors  }}`.split(",");
             const welcomeMessage = `Welcome ${newContributors.map((contributor) => `@${contributor.trim().replace(/^@/, '')}`).join(", ")}!!`;
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
