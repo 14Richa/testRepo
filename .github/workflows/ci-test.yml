@@ -95,8 +95,9 @@ jobs:
             if(removed.length > 0) {
               code.info(`Removed contributors: ${removed.map((obj) => obj.name).join(", ")}`);
             }
-          outputs:
-            added: ${{ JSON.stringify(added.map((obj) => obj.name)) }}           
+        outputs:
+          added: ${{ JSON.stringify(added.map((obj) => obj.name)) }}
+          
       - name: Display welcome message
         if: ${{steps.compare-files.outputs.added != ''}}
         uses: actions/github-script@v3
