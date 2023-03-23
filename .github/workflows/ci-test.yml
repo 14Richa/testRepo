@@ -24,7 +24,6 @@
 #         with:
 #           script: |
 #             const fs = require("fs");
-#             const core = require('@actions/core');
 #             const main_file = JSON.parse(fs.readFileSync(`${process.env.HOME}/TSC_MEMBERS.json`));
 #             const new_file = JSON.parse(fs.readFileSync('TSC_MEMBERS.json'));
 #             const added = new_file.filter(
