@@ -89,14 +89,12 @@ jobs:
             );
             if(added.length > 0) {
               core.info(`Added member: ${added}`);
-              core.exportVariable('envAdded', added);
-
             }
             if(removed.length > 0) {
               core.info('Removed member: ${removed}');
             }           
       - name: Display welcome message
-        if: ${{ envAdded }}
+        # if: ${{ envAdded }}
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
