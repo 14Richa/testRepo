@@ -95,7 +95,7 @@ jobs:
               core.setOutput("removed", "true");
             }         
       - name: Display welcome message
-         if: steps.compare-files.outputs.added_contributors != ''
+        if: steps.compare-files.outputs.added_contributors != ''
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
