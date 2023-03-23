@@ -72,11 +72,6 @@ jobs:
         uses: actions/checkout@v2
         with: 
           ref: ${{github.event.inputs.branch}}
-      - name: Install dependencies
-        run: npm install
-        env:
-          ADDED_PACKAGES: ${{ env.ADDED_OUTPUT }}
-          REMOVED_PACKAGES: ${{ env.REMOVED_OUTPUT }}
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v4
@@ -93,15 +88,15 @@ jobs:
               (oldObj) => !new_file.some((newObj) => newObj.name === oldObj.name)
             );
             if(added.length > 0) {
-              core.exportVariable('ADDED_OUTPUT', added);
               core.info(`Added member: ${added}`);
+              core.exportVariable('envAdded', added);
+
             }
             if(removed.length > 0) {
-              core.exportVariable('REMOVED_OUTPUT', removed);
               core.info('Removed member: ${removed}');
             }           
       - name: Display welcome message
-        if: ${{ env.ADDED_OUTPUT }}
+        if: ${{ envAdded }}
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
