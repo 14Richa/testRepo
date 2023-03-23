@@ -1,11 +1,9 @@
 # name: Welcome New Contributor
-
 # on:
 #   pull_request:
 #     types: [opened]
 #     paths: 
 #       - 'TSC_MEMBERS.json'
-
 # jobs:
 #   welcome:
 #     runs-on: ubuntu-latest
@@ -26,6 +24,7 @@
 #         with:
 #           script: |
 #             const fs = require("fs");
+#             const core = require('@actions/core');
 #             const main_file = JSON.parse(fs.readFileSync(`${process.env.HOME}/TSC_MEMBERS.json`));
 #             const new_file = JSON.parse(fs.readFileSync('TSC_MEMBERS.json'));
 #             const added = new_file.filter(
@@ -54,13 +53,11 @@
 
 
 name: Welcome New Contributor
-
 on:
   pull_request:
     types: [opened]
     paths: 
       - 'TSC_MEMBERS.json'
-
 jobs:
   welcome:
     runs-on: ubuntu-latest
@@ -75,12 +72,18 @@ jobs:
         uses: actions/checkout@v2
         with: 
           ref: ${{github.event.inputs.branch}}
+      - name: Install dependencies
+        run: npm install
+        env:
+          ADDED_PACKAGES: ${{ env.ADDED_OUTPUT }}
+          REMOVED_PACKAGES: ${{ env.REMOVED_OUTPUT }}
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v4
         with:
           script: |
             const fs = require("fs");
+            const core = require('@actions/core');
             const main_file = JSON.parse(fs.readFileSync(`${process.env.HOME}/TSC_MEMBERS.json`));
             const new_file = JSON.parse(fs.readFileSync('TSC_MEMBERS.json'));
             const added = new_file.filter(
@@ -90,21 +93,20 @@ jobs:
               (oldObj) => !new_file.some((newObj) => newObj.name === oldObj.name)
             );
             if(added.length > 0) {
-              code.info(`New contributors: ${added.map((obj) => obj.name).join(", ")}`);
+              core.exportVariable('ADDED_OUTPUT', addedOutput);
+              core.info(`Added member: ${addedOutput}`);
             }
             if(removed.length > 0) {
-              code.info(`Removed contributors: ${removed.map((obj) => obj.name).join(", ")}`);
-            }
-        outputs:
-          added: ${{ JSON.stringify(added.map((obj) => obj.name)) }}
-          
+              core.exportVariable('REMOVED_OUTPUT', removedOutput);
+              core.info('Removed member: ${removedOutput}');
+            }           
       - name: Display welcome message
-        if: ${{steps.compare-files.outputs.added != ''}}
+        if: ${{ env.ADDED_OUTPUT }}
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const newContributors = `${{steps.compare-files.outputs.added}}`.split(",");
+            const newContributors = `${{ env.ADDED_OUTPUT }}`.split(",");
             const welcomeMessage = `Welcome ${newContributors.map((contributor) => `@${contributor.trim().replace(/^@/, '')}`).join(", ")}!!`;
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
