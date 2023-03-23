@@ -77,7 +77,7 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-            const core = require('@actions/core');
+            const myCore = require('@actions/core');
             const main_file = JSON.parse(fs.readFileSync(`${process.env.HOME}/TSC_MEMBERS.json`));
             const new_file = JSON.parse(fs.readFileSync('TSC_MEMBERS.json'));
             const added = new_file.filter(
@@ -87,11 +87,11 @@ jobs:
               (oldObj) => !new_file.some((newObj) => newObj.name === oldObj.name)
             );
             if(added.length > 0) {
-              core.info(`Added members: ${added.map((obj) => obj.name).join(",")}`);
+              myCore.info(`Added members: ${added.map((obj) => obj.name).join(",")}`);
               core.setOutput("removed_contributors", added.map((obj) => obj.name).join(","));
             }
             if(removed.length > 0) {
-              core.info(`Removed members: true`);
+              myCore.info(`Removed members: true`);
               core.setOutput("removed", "true");
             }         
       - name: Display welcome message
