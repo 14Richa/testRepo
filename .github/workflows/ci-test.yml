@@ -60,7 +60,9 @@ on:
 jobs:
   welcome:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
+      - name: Install dependencies
+        run: npm install @actions/core 
       - name: Checkout main branch 
         uses: actions/checkout@v2
         with:
