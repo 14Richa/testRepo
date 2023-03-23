@@ -90,10 +90,10 @@ jobs:
               (oldObj) => !new_file.some((newObj) => newObj.name === oldObj.name)
             );
             if(added.length > 0) {
-              core.info(`New contributors: ${added.map((obj) => obj.name).join(", ")}`);
+              code.info(`New contributors: ${added.map((obj) => obj.name).join(", ")}`);
             }
             if(removed.length > 0) {
-              core.info(`Removed contributors: ${removed.map((obj) => obj.name).join(", ")}`);
+              code.info(`Removed contributors: ${removed.map((obj) => obj.name).join(", ")}`);
             }
             outputs:
               added: ${{ JSON.stringify(added.map((obj) => obj.name)) }}           
