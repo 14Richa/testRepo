@@ -52,5 +52,16 @@
 		"repos": [
 			"cupid"
 		]
-	}		
+	},
+	{
+		"name": "Alex",
+		"github": "cderf",
+		"linkedin": "alex14",
+		"slack": "U01QX79S734",
+		"twitter": "Alex",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
+	}			
 ]
