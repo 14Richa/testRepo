@@ -93,16 +93,16 @@ jobs:
               (oldObj) => !new_file.some((newObj) => newObj.name === oldObj.name)
             );
             if(added.length > 0) {
-              core.exportVariable('ADDED_OUTPUT', addedOutput);
-              core.info(`Added member: ${addedOutput}`);
+              core.exportVariable('ADDED_OUTPUT', added);
+              core.info(`Added member: ${added}`);
             }
             if(removed.length > 0) {
-              core.exportVariable('REMOVED_OUTPUT', removedOutput);
-              core.info('Removed member: ${removedOutput}');
+              core.exportVariable('REMOVED_OUTPUT', removed);
+              core.info('Removed member: ${removed}');
             }           
       - name: Display welcome message
         if: ${{ env.ADDED_OUTPUT }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
