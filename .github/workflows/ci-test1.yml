@@ -1,0 +1,20 @@
+# A github action to check the reaction on pr and issues . 
+
+name: Check reactions
+
+on:
+  pull_request:
+  issues:
+    types: [opened, edited, reopened, closed]
+
+jobs:
+  check-reactions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check reactions
+        uses: peter-evans/reaction-labeler@v2.1.1
+        with:
+          repo-token: ${{ secrets.BOT_TOKEN  }}
+          issue-regex: '^(?![Bb]ot).*'
+          pr-regex: '^(?![Bb]ot).*'
