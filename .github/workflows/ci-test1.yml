@@ -1,20 +1,18 @@
 # A github action to check the reaction on pr and issues . 
 
-name: Check Reactions
-
+name: Check Reactions on Pr and Issue
 on:
   issues:
-    types: [opened, edited]
+    types: [opened]
   pull_request:
-    types: [opened, edited, closed]
-
+    types: [opened, closed]
 jobs:
   check-reactions:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Check reactions
+      - name: Check Reactions
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
