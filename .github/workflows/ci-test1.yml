@@ -1,4 +1,27 @@
-# A github action to check the reaction on pr and issues . 
+# # A github action to check the reaction on pr and issues . 
+
+# name: Check Reactions on Pr and Issue
+# on:
+#   issues:
+#     types: [opened]
+#   pull_request:
+#     types: [opened, closed]
+# jobs:
+#   check-reactions:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+#       - name: Check Reactions
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+#         run: |
+#           curl -H "Authorization: token $GITHUB_TOKEN" \
+#             "https://api.github.com/repos/${{ github.repository }}/issues?state=all" \
+#             | jq '.[] | {number: .number, title: .title, reactions: .reactions}'
+
+## WORKFLOW WHIHC REPORT ISSUE OR PR WHICH HAVE MORE THAN 5 REACTION 
+
 
 name: Check Reactions on Pr and Issue
 on:
@@ -16,7 +39,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          curl -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${{ github.repository }}/issues?state=all" \
-            | jq '.[] | {number: .number, title: .title, reactions: .reactions}'
-
+          REACTIONS_THRESHOLD=1
+          REACTIONS_URL="https://api.github.com/repos/${{ github.repository }}/issues?state=all"
+          REACTIONS=$(curl -H "Authorization: token $GITHUB_TOKEN" "$REACTIONS_URL" | jq '.[] | select(.reactions.total_count >= $REACTIONS_THRESHOLD) | {number: .number, title: .title, url: .html_url, reactions: .reactions}')
+          if [[ -z "$REACTIONS" ]]; then
+            echo "No issues or pull requests with 5 or more reactions."
+          else
+            echo "$REACTIONS" | while read -r line; do
+              echo "Found issue or pull request with 5 or more reactions:"
+              echo "$line"
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" -d '{"body":"This issue or pull request has 5 or more reactions: '$line'"}' "$REACTIONS_URL"
+            done
+          fi
