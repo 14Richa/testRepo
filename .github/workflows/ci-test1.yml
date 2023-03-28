@@ -39,7 +39,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          REACTIONS_THRESHOLD=1
+          REACTIONS_THRESHOLD=5
           REACTIONS_URL="https://api.github.com/repos/${{ github.repository }}/issues?state=all"
           REACTIONS=$(curl -H "Authorization: token $GITHUB_TOKEN" "$REACTIONS_URL" | jq '.[] | select(.reactions.total_count >= $REACTIONS_THRESHOLD) | {number: .number, title: .title, url: .html_url, reactions: .reactions}')
           if [[ -z "$REACTIONS" ]]; then
