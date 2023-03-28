@@ -26,8 +26,10 @@
 name: Measure Reactions on PR and Issue
 
 on:
+  issues:
+    types: [opened, reopened, closed]
   pull_request: 
-    types: [closed]
+    types: [opened, closed]
   
 jobs:
   measure-reactions:
