@@ -1,34 +1,37 @@
-import os
 import requests
-
-headers = {
-    'Authorization': f'token {os.environ["GITHUB_TOKEN"]}',
-    'Accept': 'application/vnd.github.squirrel-girl-preview+json'
-}
-
-
-def get_reactions(url):
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    data = response.json()
-    reactions = {}
-    for reaction in data:
-        reactions[reaction['content']] = reaction['users']['total_count']
-    return reactions
+from ibm_watson import ToneAnalyzerV3
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
 
 def main():
-    event_type = os.environ['GITHUB_EVENT_NAME']
-    if event_type == 'pull_request':
-        url = os.environ['GITHUB_API_URL'] + '/repos/' + os.environ['GITHUB_REPOSITORY'] + \
-            '/pulls/' + os.environ['GITHUB_EVENT_NUMBER'] + '/reactions'
-    elif event_type == 'issues':
-        url = os.environ['GITHUB_API_URL'] + '/repos/' + os.environ['GITHUB_REPOSITORY'] + \
-            '/issues/' + os.environ['GITHUB_EVENT_NUMBER'] + '/reactions'
-    else:
-        raise ValueError('Unsupported event type: ' + event_type)
-    reactions = get_reactions(url)
-    print(reactions)
+    pr_or_issue = get_pr_or_issue()
+    content = pr_or_issue['body'] or pr_or_issue['title']
+    tone_analyzer = get_tone_analyzer()
+    tone_analysis = tone_analyzer.tone(
+        {'text': content}, content_type='text/plain').get_result()
+    tones = tone_analysis['document_tone']['tones']
+    for tone in tones:
+        print(f"{tone['tone_name']}: {tone['score']}")
+
+
+def get_pr_or_issue():
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': f'token {os.environ.get("GITHUB_TOKEN")}'
+    }
+    url = os.environ.get('GITHUB_EVENT_PATH')
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+def get_tone_analyzer():
+    authenticator = IAMAuthenticator(os.environ.get('IBM_API_KEY'))
+    tone_analyzer = ToneAnalyzerV3(
+        version='2021-03-25',
+        authenticator=authenticator
+    )
+    tone_analyzer.set_service_url(os.environ.get('IBM_URL'))
+    return tone_analyzer
 
 
 if __name__ == '__main__':

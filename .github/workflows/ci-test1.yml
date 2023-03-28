@@ -23,33 +23,38 @@
 ## WORKFLOW WHIHC REPORT ISSUE OR PR WHICH HAVE MORE THAN 5 REACTION 
 
 
-name: Measure Reactions on PR and Issue
+name: Measure Emotions in PR and Issues
 
 on:
+  pull_request:
+    types: [opened, edited, reopened]
   issues:
-    types: [opened, reopened, closed]
-  pull_request: 
-    types: [opened, closed]
-  
+    types: [opened, edited, reopened]
+
 jobs:
-  measure-reactions:
+  measure-emotions:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt
+      - name: Install Dependencies
+        run: |
+          pip install requests
+          pip install ibm-watson
 
-    - name: Measure reactions
-      env:
-        GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
-      run: python measure_reactions.py
+      - name: Measure Emotions
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          IBM_API_KEY: ${{ secrets.IBM_API_KEY }}
+          IBM_URL: ${{ secrets.IBM_URL }}
+        run: python measure_reactions.py
+
 
 
 
