@@ -24,7 +24,6 @@
 
 
 name: Check Reactions on Pr and Issue
-name: Check Reactions on Pr and Issue
 on:
   issues:
     types: [opened]
