@@ -26,7 +26,8 @@
 name: Measure Reactions on PR and Issue
 
 on:
-  pull_request: [closed]
+  pull_request: 
+    types: [closed]
   
 jobs:
   measure-reactions:
