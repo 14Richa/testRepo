@@ -24,6 +24,7 @@
 
 
 name: Check Reactions on Pr and Issue
+name: Check Reactions on Pr and Issue
 on:
   issues:
     types: [opened]
@@ -32,14 +33,15 @@ on:
 jobs:
   check-reactions:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+      REACTIONS_THRESHOLD: 5
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Check Reactions
-        env:
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
-          REACTIONS_THRESHOLD=5
           REACTIONS_URL="https://api.github.com/repos/${{ github.repository }}/issues/$ISSUE_NUMBER/comments"
           REACTIONS=$(curl -H "Authorization: token $GITHUB_TOKEN" "$REACTIONS_URL" | jq '.[] | select(.reactions.total_count >= $REACTIONS_THRESHOLD) | {number: .number, title: .title, url: .html_url, reactions: .reactions}')
           if [[ -z "$REACTIONS" ]]; then
@@ -51,3 +53,4 @@ jobs:
             curl -X POST -H "Authorization: token $GITHUB_TOKEN" -d '{"body":"This issue or pull request has 5 or more reactions: '$line'"}' "$REACTIONS_URL"
             done
           fi
+
