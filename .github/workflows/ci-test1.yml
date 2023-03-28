@@ -38,22 +38,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
       - name: Install Dependencies
-        run: |
-          pip install requests
-          pip install ibm-watson
+        run: npm install
 
       - name: Measure Emotions
         env:
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IBM_API_KEY: ${{ secrets.IBM_API_KEY }}
           IBM_URL: ${{ secrets.IBM_URL }}
-        run: python measure_reactions.py
+        run: node measure_emotions.js
+
 
 
 
