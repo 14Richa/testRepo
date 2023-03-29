@@ -66,10 +66,11 @@ jobs:
       - name: Check Reactions
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.TEST_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({ auth: process.env.github-token });
+            const context = JSON.parse(JSON.stringify(github.context));
             const { owner, repo } = context.repo;
             // Check issues with more than 5 reactions
             const issues = await octokit.issues.listForRepo({
