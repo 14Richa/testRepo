@@ -1,0 +1,48 @@
+name: Validate Workflow on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/**'
+
+jobs:
+  validate-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Validate workflow YAML files
+        uses: docker://adrienverge/yamllint:latest
+        with:
+          args: -c .yamllint.yml .github/workflows/*.yml
+
+      - name: Validate workflow schema
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+      - run: |
+          const Ajv = require('ajv');
+          const axios = require('axios');
+          const yaml = require('js-yaml');
+          const fs = require('fs').promises;
+
+          const schema = await axios.get(
+            'https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json'
+          );
+
+          const file = await fs.readFile('.github/workflows/*.yml', 'utf8');
+          const target = yaml.load(file);
+
+          const ajv = new Ajv({ strict: false, allErrors: true });
+          const validator = ajv.compile(schema.data);
+          const valid = validator(target);
+          if (!valid) {
+            console.error(`Validation failed with the following errors:`);
+            console.error(validator.errors);
+            process.exit(1);
+          } else {
+            console.log(`Workflow is valid`);
+          }
