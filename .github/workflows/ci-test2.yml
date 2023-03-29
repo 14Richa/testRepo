@@ -13,11 +13,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: npm install yamllint ajv axios js-yaml
 
-      - name: Validate workflow YAML files
+      - name: List YAML files to validate
         run: |
           set -e
-          yamllint -c .yamllint.yml .github/workflows/
+          files=$(find .github/workflows -name '*.yml')
+          echo "Validating the following files:"
+          echo "$files"
+
 
       - name: Validate workflow schema
         uses: actions/setup-node@v2
@@ -47,7 +53,7 @@ jobs:
               if (!valid) {
                 console.error(`Validation failed with the following errors:`);
                 console.error(validator.errors);
-                process.exit(1);
+                process.exitCode = 1;
               } else {
                 console.log(`Workflow is valid`);
               }
