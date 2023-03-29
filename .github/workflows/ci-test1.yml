@@ -28,6 +28,9 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/issues/$issue/labels" \
               -d '{"labels": ["more than 5 reactions"]}'
           done
+          prs=$(curl -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?state=all" \
+            | jq '.[] | select(.reactions.total_count > 5) | .number')
           echo "Found PRs with more than 5 reactions: $prs"
           for pr in $prs; do
             echo "Adding label to PR #$pr..."
