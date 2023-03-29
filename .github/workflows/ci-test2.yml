@@ -88,4 +88,4 @@ jobs:
       - name: Lint YAML Files
         run: |
           set -e
-          find .github/workflows -type f -name "*.yml" -print0 | xargs -0 yaml-lint -q
+          find .github/workflows -type f -name "*.yml" -print0 | xargs -0 ./node_modules/.bin/yamllint -q
