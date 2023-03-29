@@ -28,6 +28,14 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/issues/$issue/labels" \
               -d '{"labels": ["more than 5 reactions"]}'
           done
+          echo "Found PRs with more than 5 reactions: $prs"
+          for pr in $prs; do
+            echo "Adding label to PR #$pr..."
+            curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/$pr/labels" \
+              -d '{"labels": ["more than 5 reactions"]}'
+          done
 
 
 
