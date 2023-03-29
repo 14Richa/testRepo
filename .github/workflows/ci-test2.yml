@@ -23,7 +23,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
-        run: |
+
+      - run: |
           set -e
           const Ajv = require('ajv');
           const axios = require('axios');
