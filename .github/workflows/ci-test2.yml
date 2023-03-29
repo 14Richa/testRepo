@@ -15,15 +15,16 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Validate workflow YAML files
-        uses: docker://adrienverge/yamllint:latest
-        with:
-          args: -c .yamllint.yml .github/workflows/*.yml
+        run: |
+          set -e
+          find .github/workflows -name '*.yml' -print0 | xargs -0 yamllint -c .yamllint.yml
 
       - name: Validate workflow schema
         uses: actions/setup-node@v2
         with:
           node-version: '16.x'
-      - run: |
+        run: |
+          set -e
           const Ajv = require('ajv');
           const axios = require('axios');
           const yaml = require('js-yaml');
@@ -33,16 +34,20 @@ jobs:
             'https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json'
           );
 
-          const file = await fs.readFile('.github/workflows/*.yml', 'utf8');
-          const target = yaml.load(file);
+          const files = await fs.readdir('.github/workflows');
+          const ymlFiles = files.filter(file => file.endsWith('.yml'));
 
-          const ajv = new Ajv({ strict: false, allErrors: true });
-          const validator = ajv.compile(schema.data);
-          const valid = validator(target);
-          if (!valid) {
-            console.error(`Validation failed with the following errors:`);
-            console.error(validator.errors);
-            process.exit(1);
-          } else {
-            console.log(`Workflow is valid`);
-          }
+          for (const file of ymlFiles) {
+            const content = await fs.readFile(`.github/workflows/${file}`, 'utf8');
+            const target = yaml.load(content);
+
+            const ajv = new Ajv({ strict: false, allErrors: true });
+            const validator = ajv.compile(schema.data);
+            const valid = validator(target);
+            if (!valid) {
+              console.error(`Validation failed with the following errors:`);
+              console.error(validator.errors);
+              process.exit(1);
+            } else {
+              console.log(`Workflow is valid`);
+            }
