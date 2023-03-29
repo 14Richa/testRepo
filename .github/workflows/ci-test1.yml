@@ -1,4 +1,51 @@
-# A github action to check the reaction on pr and issues . 
+# # A github action to check the reaction on pr and issues . 
+
+# name: Check Reactions on Pr and Issue
+# on:
+#   issues:
+#     types: [opened]
+#   pull_request:
+#     types: [opened, closed]
+# jobs:
+#   check-reactions:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+#       - name: Check Reactions
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
+#         run: |
+#           echo "Checking reactions..."
+#             issues=$(curl -H "Authorization: token $GITHUB_TOKEN" \
+#             "https://api.github.com/repos/${{ github.repository }}/issues?state=all" \
+#             | jq '.[] | select(.reactions.total_count > 5) | .number')
+#           echo "Found issues with more than 5 reactions: $issues"
+#           for issue in $issues; do
+#             echo "Adding label to issue #$issue..."
+#             curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+#               -H "Accept: application/vnd.github.v3+json" \
+#               "https://api.github.com/repos/${{ github.repository }}/issues/$issue/labels" \
+#               -d '{"labels": ["more than 5 reactions"]}'
+#           done
+#           echo "Checking reactions..."
+#           prs=$(curl -H "Authorization: token $GITHUB_TOKEN" \
+#           "https://api.github.com/repos/${{ github.repository }}/pulls?state=all" \
+#           | jq '.[] | select(.reactions.total_count > 5) | .number')
+#           echo "Found pr with more than 5 reactions: $prs"
+#           if [ -z "$prs" ]; then
+#             echo "No pull requests with more than 5 reactions found."
+#           else
+#             for pr in $prs; do
+#               echo "Adding label to pr #$pr..."
+#               curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+#               -H "Accept: application/vnd.github.v3+json" \
+#               "https://api.github.com/repos/${{ github.repository }}/pulls/$pr/labels" \
+#               -d '{"labels": ["more than 5 reactions"]}'
+#             done
+#           fi
+
+
 
 name: Check Reactions on Pr and Issue
 on:
@@ -13,38 +60,60 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Check Reactions
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
         env:
           GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
         run: |
-          echo "Checking reactions..."
-            issues=$(curl -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${{ github.repository }}/issues?state=all" \
-            | jq '.[] | select(.reactions.total_count > 5) | .number')
-          echo "Found issues with more than 5 reactions: $issues"
-          for issue in $issues; do
-            echo "Adding label to issue #$issue..."
-            curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/issues/$issue/labels" \
-              -d '{"labels": ["more than 5 reactions"]}'
-          done
-          echo "Checking reactions..."
-          prs=$(curl -H "Authorization: token $GITHUB_TOKEN" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls?state=all" \
-          | jq '.[] | select(.reactions.total_count > 5) | .number')
-          echo "Found pr with more than 5 reactions: $prs"
-          if [ -z "$prs" ]; then
-            echo "No pull requests with more than 5 reactions found."
-          else
-            for pr in $prs; do
-              echo "Adding label to pr #$pr..."
-              curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/${{ github.repository }}/pulls/$pr/labels" \
-              -d '{"labels": ["more than 5 reactions"]}'
-            done
-          fi
-
-
-
+          const { Octokit } = require("@octokit/rest");
+          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+          
+          console.log("Checking reactions on issues...");
+          const { data: issues } = await octokit.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: "all",
+          });
+          const issuesWithReactions = issues.filter(
+            (issue) => issue.reactions.total_count > 5
+          );
+          console.log(
+            `Found issues with more than 5 reactions: ${issuesWithReactions.map(
+              (issue) => `#${issue.number}`
+            )}`
+          );
+          for (const issue of issuesWithReactions) {
+            console.log(`Adding label to issue #${issue.number}...`);
+            await octokit.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              labels: ["more than 5 reactions"],
+            });
+          }
+          
+          console.log("Checking reactions on pull requests...");
+          const { data: pullRequests } = await octokit.pulls.list({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: "all",
+          });
+          const pullsWithReactions = pullRequests.filter(
+            (pull) => pull.reactions.total_count > 5
+          );
+          console.log(
+            `Found pull requests with more than 5 reactions: ${pullsWithReactions.map(
+              (pull) => `#${pull.number}`
+            )}`
+          );
+          for (const pull of pullsWithReactions) {
+            console.log(`Adding label to pull request #${pull.number}...`);
+            await octokit.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pull.number,
+              labels: ["more than 5 reactions"],
+            });
+          }
 
