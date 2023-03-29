@@ -67,13 +67,16 @@ jobs:
         with:
            script: |
             const { owner, repo } = context.repo;
-
+            const { Octokit } = require('@octokit/rest');
+            const octokit = new Octokit({
+              auth: process.env.TEST_TOKEN,
+            });
             // Retrieve all issues with the "more than 5 reactions" label
             const issuesResponse = await octokit.issues.listForRepo({
               owner,
               repo,
               state: 'all',
-              labels: 'more than 5 reactions'
+              labels: '-more than 5 reactions'
             });
             if (issuesResponse.data) {
               console.log(`Found ${issuesResponse.data.length} issues`);
