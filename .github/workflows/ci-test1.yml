@@ -48,6 +48,7 @@
 
 
         
+
 name: Check Reactions on Pr and Issue
 on:
   issues:
@@ -67,11 +68,8 @@ jobs:
         with:
           github-token: ${{ secrets.TEST_TOKEN }}
           script: |
-            const octokit = require('@octokit/rest')();
-            octokit.authenticate({
-              type: 'token',
-              token: process.env.github-token
-            });
+            const { Octokit } = require('@octokit/rest');
+            const octokit = new Octokit({ auth: process.env.github-token });
             const { owner, repo } = context.repo;
             // Check issues with more than 5 reactions
             const issues = await octokit.issues.listForRepo({
