@@ -60,6 +60,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Check Reactions
+        env:
+          GITHUB_TOKEN: ${{ secrets.TEST_LABEL_TOKEN}}
         uses: actions/github-script@v4
         with:
           script: |
@@ -110,5 +112,4 @@ jobs:
                 labels: ["more than 5 reactions"],
               });
             }
-        env:
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
+        
