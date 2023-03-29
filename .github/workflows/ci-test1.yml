@@ -68,38 +68,40 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ auth: process.env.github-token });
-            const { owner, repo } = context.repo;
-            // Check issues with more than 5 reactions
-            const issues = await octokit.issues.listForRepo({
-              owner,
-              repo,
-              state: 'all',
-            });
-            for (const issue of issues.data) {
-              if (issue.reactions.total_count > 5) {
-                await octokit.issues.addLabels({
-                  owner,
-                  repo,
-                  issue_number: issue.number,
-                  labels: ['more than 5 reactions'],
-                });
+              const { Octokit } = require('@octokit/rest');
+              const octokit = new Octokit({ auth: process.env.github-token });
+              const { owner, repo } = context.repo;
+            
+              // Check issues with more than 5 reactions
+              const issues = await octokit.issues.listForRepo({
+                owner,
+                repo,
+                state: 'all',
+              });
+              for (const issue of issues.data) {
+                if (issue.reactions.total_count > 5) {
+                  await octokit.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    labels: ['more than 5 reactions'],
+                  });
+                }
               }
-            }
-            // Check pull requests with more than 5 reactions
-            const pulls = await octokit.pulls.list({
-              owner,
-              repo,
-              state: 'all',
-            });
-            for (const pull of pulls.data) {
-              if (pull.reactions.total_count > 5) {
-                await octokit.issues.addLabels({
-                  owner,
-                  repo,
-                  issue_number: pull.number,
-                  labels: ['more than 5 reactions'],
-                });
+            
+              // Check pull requests with more than 5 reactions
+              const pulls = await octokit.pulls.list({
+                owner,
+                repo,
+                state: 'all',
+              });
+              for (const pull of pulls.data) {
+                if (pull.reactions.total_count > 5) {
+                  await octokit.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: pull.number,
+                    labels: ['more than 5 reactions'],
+                  });
+                }
               }
-            }
