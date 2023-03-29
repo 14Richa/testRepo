@@ -17,7 +17,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
         run: |
           echo "Checking reactions..."
-          issues=$(curl -H "Authorization: token $GITHUB_TOKEN" \
+            issues=$(curl -H "Authorization: token $GITHUB_TOKEN" \
             "https://api.github.com/repos/${{ github.repository }}/issues?state=all" \
             | jq '.[] | select(.reactions.total_count > 5) | .number')
           echo "Found issues with more than 5 reactions: $issues"
