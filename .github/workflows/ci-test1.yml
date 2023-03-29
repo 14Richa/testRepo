@@ -47,6 +47,7 @@
 
 
 
+        
 name: Check Reactions on Pr and Issue
 on:
   issues:
@@ -60,56 +61,45 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Check Reactions
-        env:
-          GITHUB_TOKEN: ${{ secrets.TEST_LABEL_TOKEN}}
         uses: actions/github-script@v4
         with:
+          github-token: ${{ secrets.TEST_TOKEN }}
           script: |
-            console.log("Checking reactions on issues...");
-            const { data: issues } = await github.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: "all",
+            const octokit = require('@octokit/rest')();
+            octokit.authenticate({
+              type: 'token',
+              token: process.env.github-token
             });
-            const issuesWithReactions = issues.filter(
-              (issue) => issue.reactions.total_count > 5
-            );
-            console.log(
-              `Found issues with more than 5 reactions: ${issuesWithReactions.map(
-                (issue) => `#${issue.number}`
-              )}`
-            );
-            for (const issue of issuesWithReactions) {
-              console.log(`Adding label to issue #${issue.number}...`);
-              await github.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                labels: ["more than 5 reactions"],
-              });
-            }
-
-            console.log("Checking reactions on pull requests...");
-            const { data: pullRequests } = await github.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: "all",
+            const { owner, repo } = context.repo;
+            // Check issues with more than 5 reactions
+            const issues = await octokit.issues.listForRepo({
+              owner,
+              repo,
+              state: 'all',
             });
-            const pullsWithReactions = pullRequests.filter(
-              (pull) => pull.reactions.total_count > 5
-            );
-            console.log(
-              `Found pull requests with more than 5 reactions: ${pullsWithReactions.map(
-                (pull) => `#${pull.number}`
-              )}`
-            );
-            for (const pull of pullsWithReactions) {
-              console.log(`Adding label to pull request #${pull.number}...`);
-              await github.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pull.number,
-                labels: ["more than 5 reactions"],
-              });
+            for (const issue of issues.data) {
+              if (issue.reactions.total_count > 5) {
+                await octokit.issues.addLabels({
+                  owner,
+                  repo,
+                  issue_number: issue.number,
+                  labels: ['more than 5 reactions'],
+                });
+              }
             }
-        
+            // Check pull requests with more than 5 reactions
+            const pulls = await octokit.pulls.list({
+              owner,
+              repo,
+              state: 'all',
+            });
+            for (const pull of pulls.data) {
+              if (pull.reactions.total_count > 5) {
+                await octokit.issues.addLabels({
+                  owner,
+                  repo,
+                  issue_number: pull.number,
+                  labels: ['more than 5 reactions'],
+                });
+              }
+            }
