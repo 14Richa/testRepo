@@ -17,7 +17,7 @@ jobs:
       - name: Validate workflow YAML files
         run: |
           set -e
-          find .github/workflows -name '*.yml' -print0 | xargs -0 yamllint -c .yamllint.yml
+          yamllint -c .yamllint.yml .github/workflows/
 
       - name: Validate workflow schema
         uses: actions/setup-node@v2
