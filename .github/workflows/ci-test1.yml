@@ -103,7 +103,7 @@ jobs:
                          owner,
                          repo,
                          issue_number: issue.number,
-                         labels: [moreThan5ReactionsLabel],
+                         labels: [moreThan5ReactionsLabel.name],
                       });
                     }
                   }
@@ -134,7 +134,7 @@ jobs:
                         owner,
                         repo,
                         issue_number: pull.number,
-                        labels: [moreThan5ReactionsLabel],
+                        labels: [moreThan5ReactionsLabel.name],
                       });
                     }
                   }
