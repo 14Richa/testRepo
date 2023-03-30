@@ -100,10 +100,10 @@ jobs:
                     if (issue.reactions && issue.reactions.total_count > 5) {
                       console.log(`Issue #${issue.number} has ${issue.reactions.total_count} reactions`);
                       await github.issues.addLabels({
-                        owner,
-                        repo,
-                        issue_number: issue.number,
-                        labels: ['more than 5 reactions'],
+                         owner,
+                         repo,
+                         issue_number: issue.number,
+                         labels: [moreThan5ReactionsLabel],
                       });
                     }
                   }
@@ -134,7 +134,7 @@ jobs:
                         owner,
                         repo,
                         issue_number: pull.number,
-                        labels: ['more than 5 reactions'],
+                        labels: [moreThan5ReactionsLabel],
                       });
                     }
                   }
