@@ -60,14 +60,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2        
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install @octokit/rest
       - name: Add label to issues and pull requests with more than 5 reactions
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.TEST_TOKEN }}
           script: |
-            const { Octokit } = require("@octokit/rest");
-            const octokit = new Octokit();
+            const { Octokit } = require('@octokit/rest');
+            const octokit = new Octokit({ auth: '${{ secrets.TEST_TOKEN }}'});
             const { owner, repo } = context.repo;
             // Check issues with more than 5 reactions
             const issuesResponse = await octokit.issues.listForRepo({
