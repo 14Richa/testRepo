@@ -52,5 +52,16 @@
 		"repos": [
 			"cupid"
 		]
-	}		
+	},
+	{
+		"name": "Richa Sharma",
+		"github": "14Richa",
+		"linkedin": "richasharma14",
+		"slack": "U01QX79S734",
+		"twitter": "Richa14",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
+	}			
 ]
