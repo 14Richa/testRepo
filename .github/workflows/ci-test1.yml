@@ -64,64 +64,50 @@ jobs:
       - name: Add label to issues with more than 5 reactions
         uses: actions/github-script@v4
         with:
+          github-token: ${{ secrets.test_token }}
           script: |
             const { owner, repo } = context.repo;
-            const { data: issues } = await github.issues.listForRepo({
-              owner,
-              repo,
-              state: 'open'
-            });
-
-            console.log(`Found ${issues.length} issues`);
-
-            const issuesWithoutLabel = issues.filter(issue => !issue.labels.some(label => label.name === 'more than 5 reactions'));
-
-            console.log(`Found ${issuesWithoutLabel.length} issues without label`);
-
-            for (const issue of issuesWithoutLabel) {
-              console.log(`Checking issue #${issue.number}`);
-              if (issue.reactions && issue.reactions.total_count > 5) {
-                console.log(`Issue #${issue.number} has ${issue.reactions.total_count} reactions`);
-                await github.issues.addLabels({
-                  owner,
-                  repo,
-                  issue_number: issue.number,
-                  labels: ['more than 5 reactions'],
-                });
-              }
-            }
-      - name: Add label to pull requests with more than 5 reactions
-        uses: actions/github-script@v4
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const { data: pulls } = await github.pulls.list({
+            // Check issues with more than 5 reactions
+            const issuesResponse = await octokit.issues.listForRepo({
               owner,
               repo,
               state: 'open',
-              sort: 'created',
-              direction: 'desc'
             });
-
-            console.log(`Found ${pulls.length} pull requests`);
-
-            const pullsWithoutLabel = pulls.filter(pull => !pull.labels.some(label => label.name === 'more than 5 reactions'));
-
-            console.log(`Found ${pullsWithoutLabel.length} pull requests without label`);
-
-            for (const pull of pullsWithoutLabel) {
-              console.log(`Checking pull request #${pull.number}`);
-              if (pull.reactions && pull.reactions.total_count > 5) {
-                console.log(`Pull request #${pull.number} has ${pull.reactions.total_count} reactions`);
-                await github.issues.addLabels({
-                  owner,
-                  repo,
-                  issue_number: pull.number,
-                  labels: ['more than 5 reactions'],
-                });
+            if (issuesResponse.data) {
+              console.log(`Found ${issuesResponse.data.length} issues`);
+              for (const issue of issuesResponse.data) {
+                console.log(`Checking issue #${issue.number}`);
+                if (issue.reactions && issue.reactions.total_count > 5) {
+                  console.log(`Issue #${issue.number} has ${issue.reactions.total_count} reactions`);
+                  await octokit.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    labels: ['more than 5 reactions'],
+                  });
+                }
               }
             }
-        env:
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
+            // Check pull requests with more than 5 reactions
+            const pullsResponse = await octokit.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+            });
+            if (pullsResponse.data) {
+              console.log(`Found ${pullsResponse.data.length} pull requests`);
+              for (const pull of pullsResponse.data) {
+                console.log(`Checking pull request #${pull.number}`);
+                if (pull.reactions && pull.reactions.total_count > 5) {
+                  console.log(`Pull request #${pull.number} has ${pull.reactions.total_count} reactions`);
+                  await octokit.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: pull.number,
+                    labels: ['more than 5 reactions'],
+                  });
+                }
+              }
+            }
               
             
