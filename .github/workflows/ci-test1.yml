@@ -61,83 +61,58 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install @octokit/rest
       - name: Add label to issues and pull requests with more than 5 reactions
         uses: actions/github-script@v4
         with:
+          github-token: ${{ secrets.TEST_TOKEN }}
            script: |
+            const { Octokit } = require('@octokit/rest');
+            const octokit = new Octokit({ auth: '${{ secrets.GITHUB_TOKEN }}'});
             const { owner, repo } = context.repo;
-            // Get all labels for the repository
-            const labelsResponse = await github.issues.listLabelsForRepo({
+            // Check issues with more than 5 reactions
+            const issuesResponse = await octokit.issues.listForRepo({
               owner,
               repo,
+              state: 'all',
             });
-
-            if (labelsResponse.data) {
-              console.log(`Found ${labelsResponse.data.length} labels`);
-              const moreThan5ReactionsLabel = labelsResponse.data.find((label) => label.name === 'more than 5 reactions');
-              if (moreThan5ReactionsLabel) {
-                const moreThan5ReactionsLabelId = moreThan5ReactionsLabel.id;
-
-                // Check issues with more than 5 reactions and without the label
-                const issuesResponse = await github.issues.listForRepo({
-                  owner,
-                  repo,
-                  state: 'all',
-                });
-                if (issuesResponse.data) {
-                  console.log(`Found ${issuesResponse.data.length} issues`);
-                  const issuesWithoutLabelResponse = await github.issues.listForRepo({
+            if (issuesResponse.data) {
+              console.log(`Found ${issuesResponse.data.length} issues`);
+              for (const issue of issuesResponse.data) {
+                console.log(`Checking issue #${issue.number}`);
+                if (issue.reactions && issue.reactions.total_count > 5) {
+                  console.log(`Issue #${issue.number} has ${issue.reactions.total_count} reactions`);
+                  await octokit.issues.addLabels({
                     owner,
                     repo,
-                    state: 'all',
-                    labels: moreThan5ReactionsLabelId,
-                    per_page: 100,
+                    issue_number: issue.number,
+                    labels: ['more than 5 reactions'],
                   });
-                  const issuesWithoutLabel = issuesWithoutLabelResponse.data;
-                  console.log(`Found ${issuesWithoutLabel.length} issues without the label`);
-                  for (const issue of issuesWithoutLabel) {
-                    console.log(`Checking issue #${issue.number}`);
-                    if (issue.reactions && issue.reactions.total_count > 5) {
-                      console.log(`Issue #${issue.number} has ${issue.reactions.total_count} reactions`);
-                      await github.issues.addLabels({
-                         owner,
-                         repo,
-                         issue_number: issue.number,
-                         labels: [moreThan5ReactionsLabel.name],
-                      });
-                    }
-                  }
-                }
-
-                // Check pull requests with more than 5 reactions and without the label
-                const pullsResponse = await github.pulls.list({
-                  owner,
-                  repo,
-                  state: 'all',
-                });
-                if (pullsResponse.data) {
-                  console.log(`Found ${pullsResponse.data.length} pull requests`);
-                  const pullsWithoutLabelResponse = await github.pulls.list({
-                    owner,
-                    repo,
-                    state: 'all',
-                    labels: moreThan5ReactionsLabelId,
-                    per_page: 100,
-                  });
-                  const pullsWithoutLabel = pullsWithoutLabelResponse.data;
-                  console.log(`Found ${pullsWithoutLabel.length} pull requests without the label`);
-                  for (const pull of pullsWithoutLabel) {
-                    console.log(`Checking pull request #${pull.number}`);
-                    if (pull.reactions && pull.reactions.total_count > 5) {
-                      console.log(`Pull request #${pull.number} has ${pull.reactions.total_count} reactions`);
-                      await github.issues.addLabels({
-                        owner,
-                        repo,
-                        issue_number: pull.number,
-                        labels: [moreThan5ReactionsLabel.name],
-                      });
-                    }
-                  }
                 }
               }
             }
+
+            // Check pull requests with more than 5 reactions
+            const pullsResponse = await octokit.pulls.list({
+              owner,
+              repo,
+              state: 'all',
+            });
+            if (pullsResponse.data) {
+              console.log(`Found ${pullsResponse.data.length} pull requests`);
+              for (const pull of pullsResponse.data) {
+                console.log(`Checking pull request #${pull.number}`);
+                if (pull.reactions && pull.reactions.total_count > 5) {
+                  console.log(`Pull request #${pull.number} has ${pull.reactions.total_count} reactions`);
+                  await octokit.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: pull.number,
+                    labels: ['more than 5 reactions'],
+                  });
+                }
+              }
+            }
+              
+            
