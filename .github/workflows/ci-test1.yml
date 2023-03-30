@@ -64,7 +64,6 @@ jobs:
       - name: Add label to issues with more than 5 reactions
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.TEST_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
             // Check issues with more than 5 reactions
@@ -92,7 +91,7 @@ jobs:
               repo,
               state: 'open',
             }));
-            
+
             for (const pull of pulls) {
               console.log(`Checking pull request #${pull.number}`);
               if (pull.reactions && pull.reactions.total_count > 5) {
