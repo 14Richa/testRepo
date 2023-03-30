@@ -68,14 +68,14 @@ jobs:
         with:
           github-token: ${{ secrets.TEST_TOKEN }}
           script: |
-            const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ auth: '${{ secrets.TEST_TOKEN }}'});
+            const { Octokit } = require("@octokit/action");
+            const octokit = new Octokit();
             const { owner, repo } = context.repo;
             // Check issues with more than 5 reactions
             const issuesResponse = await octokit.issues.listForRepo({
               owner,
               repo,
-              state: 'all',
+              state: 'open',
             });
             if (issuesResponse.data) {
               console.log(`Found ${issuesResponse.data.length} issues`);
@@ -97,7 +97,7 @@ jobs:
             const pullsResponse = await octokit.pulls.list({
               owner,
               repo,
-              state: 'all',
+              state: 'open',
             });
             if (pullsResponse.data) {
               console.log(`Found ${pullsResponse.data.length} pull requests`);
