@@ -67,7 +67,7 @@ jobs:
         uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.TEST_TOKEN }}
-           script: |
+          script: |
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({ auth: '${{ secrets.GITHUB_TOKEN }}'});
             const { owner, repo } = context.repo;
