@@ -1,40 +1,25 @@
-name: GitHub Workflows Schema Validation
+name: Remove ready-to-merge label
 
 on:
-  pull_request: 
-    paths:
-        - '.github/workflows/*.yml'
-        - '.github/workflows/*.yaml'
-    branches:
-      - main
+  pull_request:
+    types: [opened, closed]
 
 jobs:
-  build:
+  remove-ready-label:
     runs-on: ubuntu-latest
-    name: Validate workflow schema
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Remove label
+        uses: actions/github-script@v6
         with:
-          fetch-depth: 0 
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v1
-        with:
-          path: .github/workflows 
-          files: |
-            .github/workflows/*.yml
-            .github/workflows/*.yaml
-  
-      - name: Install dependencies
-        run: |
-            npm install ajv@8.11.0
-            npm install axios@0.27.2
-            npm install js-yaml@4.1.0
-            
-      - name: Run script to validate schema
-        env:
-          FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: |
-          node .github/scripts/validate-workflow-schema.js "${{ env.FILES }}"
+          github-token: ${{ secrets.TEST_TOKEN }}
+          script: |
+            const labelToRemove = 'ready-to-merge';
+            const labels = context.payload.pull_request.labels;
+            const isLabelPresent = labels.some(label => label.name === labelToRemove)
+            if(!isLabelPresent) return;
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: labelToRemove
+            })
