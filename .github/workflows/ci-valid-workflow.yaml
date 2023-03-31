@@ -6,7 +6,7 @@ on:
         - '.github/workflows/*.yml'
         - '.github/workflows/*.yaml'
     branches:
-      - master
+      - main
 
 jobs:
   build:
