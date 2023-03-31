@@ -62,7 +62,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Add label to issues with more than 5 reactions
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const { owner, repo } = context.repo;
