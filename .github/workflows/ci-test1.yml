@@ -64,10 +64,11 @@ jobs:
       - name: Add label to issues with more than 5 reactions
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.test_token }}
           script: |
             const { owner, repo } = context.repo;
             // Check issues with more than 5 reactions
-            const issues = await github.paginate(github.issues.listForRepo.endpoint({
+            const issues = await github.paginate(github.rest.issues.listForRepo.endpoint({
               owner,
               repo,
               state: 'open',
