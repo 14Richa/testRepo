@@ -28,8 +28,8 @@ jobs:
           header: pr-title-lint-error
           GITHUB_TOKEN: ${{ secrets.TEST_TOKEN}}
           message: |
-          We require all pull request titles to follow the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/). Please update the title of this pull request to follow the specification. The error message is:
-          ``` ${{ steps.lint_pr_title.outputs.error_message }}```
+            We require all pull request titles to follow the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/). Please update the title of this pull request to follow the specification. The error message is:
+            ``` ${{ steps.lint_pr_title.outputs.error_message }}```
         # deletes the error comment if the title is correct
       - if: ${{ steps.lint_pr_title.outputs.error_message == null }}
         name: delete the comment
