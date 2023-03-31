@@ -5,36 +5,41 @@ on:
     types: [closed]
 
 jobs:
-  lint-pr-title:
-    name: Lint PR title
+  stale:
+    if: startsWith(github.repository, 'asyncapi/')
+    name: Mark issue or PR as stale
     runs-on: ubuntu-latest
     steps:
-      # Since this workflow is REQUIRED for a PR to be mergable, we have to have this 'if' statement in step level instead of job level.
-      - if: ${{ !contains(fromJson('["asyncapi-bot", "dependabot[bot]", "dependabot-preview[bot]", "allcontributors"]'), github.actor) }}
-        uses: amannn/action-semantic-pull-request@v5.0.0
-        id: lint_pr_title
-        env:
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN}}
+      - name: Mark issue or PR as stale
+        id: stale
+        uses: actions/stale@v5.2.0
         with:
-          subjectPattern: ^(?![A-Z]).+$
-          subjectPatternError: |
-            The subject "{subject}" found in the pull request title "{title}" should start with a lowercase character.
-
-      # Comments the error message from the above lint_pr_title action
-      - if: ${{ always() && steps.lint_pr_title.outputs.error_message != null && !contains(fromJson('["asyncapi-bot", "dependabot[bot]", "dependabot-preview[bot]", "allcontributors"]'), github.actor)}}
-        name: Comment on PR
-        uses:  marocchino/sticky-pull-request-comment@v2.4.2
-        with:
-          header: pr-title-lint-error
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN}}
-          message: |
-            We require all pull request titles to follow the [Conventional Commits specification](https://www.conventionalcommits.org/en/v1.0.0/). Please update the title of this pull request to follow the specification. The error message is:
-            ``` ${{ steps.lint_pr_title.outputs.error_message }}```
-        # deletes the error comment if the title is correct
-      - if: ${{ steps.lint_pr_title.outputs.error_message == null }}
-        name: delete the comment
-        uses:  marocchino/sticky-pull-request-comment@v2.4.2
-        with:
-          header: pr-title-lint-error
-          delete: true
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN}}
+          repo-token: ${{ secrets.TEST_TOKEN }}
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had recent activity :sleeping:
+            It will be closed in 120 days if no further activity occurs. To unstale this issue, add a comment with a detailed explanation. 
+            There can be many reasons why some specific issue has no activity. The most probable cause is lack of time, not lack of interest. AsyncAPI Initiative is a Linux Foundation project not owned by a single for-profit company. It is a community-driven initiative ruled under [open governance model](https://github.com/asyncapi/community/blob/master/CHARTER.md). 
+            Let us figure out together how to push this issue forward. Connect with us through [one of many communication channels](https://github.com/asyncapi/community/issues/1) we established here.
+            Thank you for your patience :heart:
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it has not had recent activity :sleeping:
+            It will be closed in 120 days if no further activity occurs. To unstale this pull request, add a comment with detailed explanation.
+            There can be many reasons why some specific pull request has no activity. The most probable cause is lack of time, not lack of interest. AsyncAPI Initiative is a Linux Foundation project not owned by a single for-profit company. It is a community-driven initiative ruled under [open governance model](https://github.com/asyncapi/community/blob/master/CHARTER.md). 
+            Let us figure out together how to push this pull request forward. Connect with us through [one of many communication channels](https://github.com/asyncapi/community/issues/1) we established here.
+            Thank you for your patience :heart:
+          days-before-stale: 120
+          days-before-close: 120
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: keep-open
+          exempt-pr-labels: keep-open
+          close-issue-reason: not_planned
+      - name: Set outputs
+        run: |
+          echo "::set-env name=stale_issues_count::${{ steps.stale.outputs.stale_issues_count }}"
+          echo "::set-env name=stale_prs_count::${{ steps.stale.outputs.stale_prs_count }}"
+        shell: bash
+      - name: Use outputs
+        run: |
+          echo "Number of stale issues: ${{ env.stale_issues_count }}"
+          echo "Number of stale PRs: ${{ env.stale_prs_count }}"
