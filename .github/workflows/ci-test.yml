@@ -54,7 +54,7 @@
 name: Welcome New Contributor
 on:
   pull_request:
-    types: [closed]
+    types: [opened]
     paths: 
       - 'TSC_MEMBERS.json'
 jobs:
