@@ -54,7 +54,7 @@
 name: Welcome New Contributor
 on:
   pull_request:
-    types: [opened]
+    types: [closed]
     paths: 
       - 'TSC_MEMBERS.json'
 jobs:
@@ -73,7 +73,7 @@ jobs:
           ref: ${{github.event.inputs.branch}}
       - name: Compare files
         id: compare-files
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           script: |
             const fs = require("fs");
@@ -95,7 +95,7 @@ jobs:
             }         
       - name: Display welcome message
         if: steps.compare-files.outputs.added_contributors != ''
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
@@ -112,7 +112,7 @@ jobs:
             
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
-            return github.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
+            return github.rest.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
 
 
 
