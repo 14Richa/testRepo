@@ -18,7 +18,7 @@ jobs:
           github-token: ${{ secrets.test_token }}
           script: |
             const { owner, repo } = context.repo;
-            // Check issues with more than 10 reactions
+            // Check issues with more than 5 reactions
             const issues = await github.paginate(github.rest.issues.listForRepo.endpoint({
               owner,
               repo,
@@ -26,7 +26,7 @@ jobs:
             }));
             for (const issue of issues) {
               console.log(`Checking issue #${issue.number}`);
-              if (issue.reactions && issue.reactions.total_count > 10) {
+              if (issue.reactions && issue.reactions.total_count > 5) {
                 console.log(`Issue #${issue.number} has ${issue.reactions.total_count} reactions`);
                 await github.rest.issues.addLabels({
                   owner,
@@ -35,7 +35,7 @@ jobs:
                   labels: ['community-attention'],
                 });
               }
-              // Check comments on issue with more than 10 reactions
+              // Check comments on issue with more than 5 reactions
               const comments = await github.paginate(github.rest.issues.listComments.endpoint({
                 owner,
                 repo,
@@ -49,7 +49,7 @@ jobs:
                   repo,
                   comment_id: comment.id,
                 });
-                if (reactions && reactions.total_count > 10) {
+                if (reactions && reactions.total_count > 5) {
                   console.log(`Comment ${comment.id} on issue #${issue.number} has ${reactions.total_count} reactions`);
                   await github.rest.issues.addLabels({
                     owner,
