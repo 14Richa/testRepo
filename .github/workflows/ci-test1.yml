@@ -18,25 +18,49 @@ jobs:
           github-token: ${{ secrets.test_token }}
           script: |
             const { owner, repo } = context.repo;
-            // Check issues with more than 5 reactions
+            // Check issues with more than 10 reactions
             const issues = await github.paginate(github.rest.issues.listForRepo.endpoint({
               owner,
               repo,
               state: 'open',
             }));
-
             for (const issue of issues) {
               console.log(`Checking issue #${issue.number}`);
-              if (issue.reactions && issue.reactions.total_count > 5) {
+              if (issue.reactions && issue.reactions.total_count > 10) {
                 console.log(`Issue #${issue.number} has ${issue.reactions.total_count} reactions`);
                 await github.rest.issues.addLabels({
                   owner,
                   repo,
                   issue_number: issue.number,
-                  labels: ['more than 5 reactions'],
+                  labels: ['community-attention'],
                 });
               }
+              // Check comments on issue with more than 10 reactions
+              const comments = await github.paginate(github.rest.issues.listComments.endpoint({
+                owner,
+                repo,
+                issue_number: issue.number,
+                per_page: 100,
+              }));
+              for (const comment of comments) {
+                console.log(`Checking comment ${comment.id} on issue #${issue.number}`);
+                const reactions = await github.rest.reactions.listForIssueComment({
+                  owner,
+                  repo,
+                  comment_id: comment.id,
+                });
+                if (reactions && reactions.total_count > 10) {
+                  console.log(`Comment ${comment.id} on issue #${issue.number} has ${reactions.total_count} reactions`);
+                  await github.rest.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    labels: ['community-attention'],
+                  });
+                }
+              }
             }
+
             // Check pull requests with more than 5 reactions
             const pulls = await github.paginate(github.rest.pulls.list.endpoint({
               owner,
