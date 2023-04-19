@@ -22,7 +22,7 @@ jobs:
           pwd
           ls -la
       - name: List directory
-        run: ls
+        run: ls ..
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
