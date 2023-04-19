@@ -11,10 +11,9 @@ jobs:
       - name: Checkout main branch 
         uses: actions/checkout@v3
         with:
+          repository: 14Richa/testRepo
           ref: main
           path: testRepo
-      # - name: Save file from main branch 
-      #   run: cp TSC_MEMBERS.json $HOME
       - name: Checkout other branch
         uses: actions/checkout@v3
       - name: Print working directory
