@@ -16,8 +16,6 @@ jobs:
         run: cp TSC_MEMBERS.json $HOME
       - name: Checkout other branch
         uses: actions/checkout@v3
-        with: 
-          ref: ${{github.event.inputs.branch}}
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
