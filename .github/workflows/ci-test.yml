@@ -13,7 +13,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-          path: testRepo-main
+          # path: testRepo-main
       # - name: Save file from main branch 
       #   run: cp TSC_MEMBERS.json $HOME
       - name: Checkout other branch
