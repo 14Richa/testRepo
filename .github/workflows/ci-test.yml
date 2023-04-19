@@ -39,7 +39,9 @@ jobs:
             if(removed.length > 0) {
               core.setOutput("removed", "true");
               core.info(`Removed Contributers : ${removed}`)
-            }         
+            }
+      - name: List directory
+        run: ls           
       - name: Display welcome message
         if: steps.compare-files.outputs.added_contributors != ''
         uses: actions/github-script@v6
