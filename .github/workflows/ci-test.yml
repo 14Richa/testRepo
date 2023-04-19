@@ -12,6 +12,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: main
+          fetch-depth: 0
           path: testRepo-main
       # - name: Save file from main branch 
       #   run: cp TSC_MEMBERS.json $HOME
