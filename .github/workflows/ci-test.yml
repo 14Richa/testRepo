@@ -29,7 +29,7 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-            const main_file = JSON.parse(fs.readFileSync(`../testRepo/TSC_MEMBERS.json`));
+            const main_file = JSON.parse(fs.readFileSync('testRepo/TSC_MEMBERS.json'));
             const new_file = JSON.parse(fs.readFileSync('TSC_MEMBERS.json'));
             const added = new_file.filter(
               (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
