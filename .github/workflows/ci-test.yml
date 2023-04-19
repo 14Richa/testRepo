@@ -15,6 +15,8 @@ jobs:
           path: testRepo-main
       # - name: Save file from main branch 
       #   run: cp TSC_MEMBERS.json $HOME
+      - name: List directory
+        run: ls
 
       - name: Checkout other branch
         uses: actions/checkout@v3
@@ -40,8 +42,7 @@ jobs:
               core.setOutput("removed", "true");
               core.info(`Removed Contributers : ${removed}`)
             }
-      - name: List directory
-        run: ls           
+                 
       - name: Display welcome message
         if: steps.compare-files.outputs.added_contributors != ''
         uses: actions/github-script@v6
