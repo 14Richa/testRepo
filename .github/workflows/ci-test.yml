@@ -22,8 +22,8 @@ jobs:
         run: |
           pwd
           ls -la
-      - name: List directory
-        run: ls testRepo
+      # - name: List directory
+      #   run: ls testRepo
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
