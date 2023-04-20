@@ -13,7 +13,7 @@ jobs:
         with:
           repository: 14Richa/testRepo
           ref: main
-          path: testRepo
+          path: testRepo-main
       - name: Checkout other branch
         uses: actions/checkout@v3
       - name: Print working directory
