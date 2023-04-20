@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main branch 
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           repository: 14Richa/testRepo
           ref: main
