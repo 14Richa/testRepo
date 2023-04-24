@@ -32,33 +32,10 @@ jobs:
           ls -la
       - name: List directory
         run: ls ..
-      # - name: Compare files
-      #   id: compare-files
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       const fs = require("fs");
-      #       const main_file = JSON.parse(fs.readFileSync('../testRepo-main/TSC_MEMBERS.json'));
-      #       const new_file = JSON.parse(fs.readFileSync('TSC_MEMBERS.json'));
-      #       const added = new_file.filter(
-      #         (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
-      #       );
-      #       const removed = main_file.filter(
-      #         (oldObj) => !new_file.some((newObj) => newObj.github === oldObj.github)
-      #       );
-      #       if(added.length > 0) {
-      #         core.info(`Added Contributers : ${JSON.stringify(added)}`)
-      #         core.setOutput("added_contributors", added.map((obj) => obj.github).join(","));
-      #       }
-      #       if(removed.length > 0) {
-      #         core.setOutput("removed", "true");
-      #         core.info(`Removed Contributers : ${removed}`)
-      #       }
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
         with:
-        working-directory: ./testRepo
           script: |
             const fs = require("fs");
             const main_file = JSON.parse(fs.readFileSync('../testRepo-main/TSC_MEMBERS.json'));
@@ -77,7 +54,7 @@ jobs:
               core.setOutput("removed", "true");
               core.info(`Removed Contributers : ${removed}`)
             }  
-                       
+        working-directory: ./testRepo               
       - name: Display welcome message
         if: steps.compare-files.outputs.added_contributors != ''
         uses: actions/github-script@v6
