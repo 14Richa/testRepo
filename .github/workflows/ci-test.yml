@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main branch 
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
-          ref: main
           repository: 14Richa/testRepo
+          ref: main
           path: testRepo-main
       - name: Print working directory
         run: |
@@ -20,11 +20,11 @@ jobs:
           ls -la
       - name: List directory
         run: ls ..
-      - name: Checkout testRepo branch 
+      # - name: Checkout other branch
+      #   uses: actions/checkout@v3
+      - name: Checkout main branch 
         uses: actions/checkout@v3
         with:
-          ref: testRepo
-          repository: 14Richa/testRepo
           path: testRepo
       - name: Print working directory
         run: |
@@ -34,8 +34,8 @@ jobs:
         run: ls ..
       - name: Compare files
         id: compare-files
-        working-directory: ./testRepo
         uses: actions/github-script@v6
+        working-directory: ./testRepo
         with:
           script: |
             const fs = require("fs");
