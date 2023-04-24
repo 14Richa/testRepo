@@ -34,6 +34,7 @@ jobs:
         run: ls ..
       - name: Compare files
         id: compare-files
+        working-directory: ./testRepo
         uses: actions/github-script@v6
         with:
           script: |
@@ -53,8 +54,7 @@ jobs:
             if(removed.length > 0) {
               core.setOutput("removed", "true");
               core.info(`Removed Contributers : ${removed}`)
-            }  
-        cwd: ./testRepo               
+            }                        
       - name: Display welcome message
         if: steps.compare-files.outputs.added_contributors != ''
         uses: actions/github-script@v6
