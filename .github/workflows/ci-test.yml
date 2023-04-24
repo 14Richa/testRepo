@@ -35,7 +35,6 @@ jobs:
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
-        working-directory: ./testRepo
         with:
           script: |
             const fs = require("fs");
