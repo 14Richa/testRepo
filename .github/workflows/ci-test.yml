@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main branch 
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          repository: 14Richa/testRepo
           ref: main
+          repository: 14Richa/testRepo
           path: testRepo-main
       - name: Print working directory
         run: |
@@ -20,11 +20,11 @@ jobs:
           ls -la
       - name: List directory
         run: ls ..
-      # - name: Checkout other branch
-      #   uses: actions/checkout@v3
-      - name: Checkout main branch 
+      - name: Checkout testRepo branch 
         uses: actions/checkout@v3
         with:
+          ref: testRepo
+          repository: 14Richa/testRepo
           path: testRepo
       - name: Print working directory
         run: |
