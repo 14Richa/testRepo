@@ -54,7 +54,7 @@ jobs:
               core.setOutput("removed", "true");
               core.info(`Removed Contributers : ${removed}`)
             }  
-        working-directory: ./testRepo               
+        cwd: ./testRepo               
       - name: Display welcome message
         if: steps.compare-files.outputs.added_contributors != ''
         uses: actions/github-script@v6
