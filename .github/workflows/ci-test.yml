@@ -34,8 +34,10 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-            const main_file = JSON.parse(fs.readFileSync('../testRepo-main/TSC_MEMBERS.json'));
             const new_file = JSON.parse(fs.readFileSync('TSC_MEMBERS.json'));
+            const { resolve } = require('path');
+            const tscMembersFileLocation = './TSC_MEMBERS.json';
+            core.info(`Location of the TSC members file: ${ resolve(tscMembersFileLocation) }`)
             const added = new_file.filter(
               (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
             );
