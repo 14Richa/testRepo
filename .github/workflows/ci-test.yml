@@ -20,8 +20,6 @@ jobs:
           ls -la
       - name: List directory
         run: ls ..
-      # - name: Checkout other branch
-      #   uses: actions/checkout@v3
       - name: Checkout main branch 
         uses: actions/checkout@v3
         with:
