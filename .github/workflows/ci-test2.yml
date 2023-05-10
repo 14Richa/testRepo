@@ -29,7 +29,6 @@ jobs:
           echo "Validating the following files:"
           echo "$files"
       - name: Validate workflow schema
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16.x'
-        run: node ./scripts/yaml-valid.js
+        run: node ./scripts/yaml-valid.js 
+        env:
+          NODE_VERSION: '16.x'
