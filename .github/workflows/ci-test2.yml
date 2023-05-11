@@ -20,6 +20,15 @@ jobs:
       - name: Install ajv
         run: npm install ajv
 
+      - name: Install axios
+        run: npm install axios
+
+      - name: Install js-yaml
+        run: npm install js-yaml
+
+      - name: Install fs
+        run: npm install fs
+
       - name: List node_modules directory
         run: ls -alh node_modules
 
