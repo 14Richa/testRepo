@@ -17,6 +17,12 @@ jobs:
       - name: Install YAML Lint
         run: npm install yaml-lint
 
+      - name: Install ajv
+        run: npm install ajv
+
+      - name: List node_modules directory
+        run: ls -alh node_modules
+
       - name: Lint YAML Files
         run: |
           set -e
@@ -28,7 +34,10 @@ jobs:
           files=$(find .github/workflows -name '*.yml')
           echo "Validating the following files:"
           echo "$files"
-      - name: Validate workflow schema
-        run: node ./scripts/yaml-valid.js 
+
+      - name: Run YAML validation
+        run: |
+          set -e
+          node ./scripts/yaml-valid.js
         env:
           NODE_VERSION: '16.x'
