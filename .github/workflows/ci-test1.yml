@@ -1,6 +1,6 @@
 # # A github action to check the reaction on pr and issues . 
 
-name: Check Reactions on Pr and Issue
+                  name: Check Reactions on Pr and Issue
 on:
   issues:
     types: [opened]
