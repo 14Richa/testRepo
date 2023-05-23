@@ -47,13 +47,13 @@ jobs:
             const removed = main_file.filter(
               (oldObj) => !new_file.some((newObj) => newObj.github === oldObj.github)
             );
-            if(added.length > 0) {
-              core.info(`Added Contributers : ${JSON.stringify(added)}`)
-              core.setOutput("added_contributors", added.map((obj) => obj.github).join(","));
+            if (added.length > 0) {
+              console.log(`Added Contributors: ${JSON.stringify(added)}`);
+              console.log(`::set-output name=added_contributors::${added.map((obj) => obj.github).join(",")}`);
             }
-            if(removed.length > 0) {
-              core.setOutput("removed", "true");
-              core.info(`Removed Contributers : ${removed}`)
+            if (removed.length > 0) {
+              console.log(`Removed Contributors: ${JSON.stringify(removed)}`);
+              console.log(`::set-output name=removed::true`);
             }
       - name: Debug added_contributors output
         run:  | 
