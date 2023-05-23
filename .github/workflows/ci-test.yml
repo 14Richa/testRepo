@@ -41,6 +41,8 @@ jobs:
             const fs = require("fs");
             const main_file = require('./testRepo-main/TSC_MEMBERS.json');
             const new_file = require('./testRepo/TSC_MEMBERS.json');
+            console.log("main_file:", main_file);
+            console.log("new_file:", new_file);
             const added = new_file.filter(
               (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
             );
