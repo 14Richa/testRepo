@@ -63,5 +63,31 @@
 		"repos": [
 			"cupid"
 		]
+	},
+	{
+		"name": "Ar",
+		"github": "14Richa",
+		"linkedin": "arjungarg17",
+		"slack": "U01QX79S734",
+		"twitter": "ArjunGarg07",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
+<<<<<<< HEAD
 	}			
+=======
+	},
+	{
+		"name": "sdjhfbew",
+		"github": "14Richa",
+		"linkedin": "arjungarg17",
+		"slack": "U01QX79S734",
+		"twitter": "ArjunGarg07",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
+	}
+>>>>>>> fcbc80a09ff44bc170be4a47f5bb8604f08b9b99
 ]
