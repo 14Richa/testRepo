@@ -54,12 +54,9 @@ jobs:
             if(removed.length > 0) {
               core.setOutput("removed", "true");
               core.info(`Removed Contributers : ${removed}`)
-            }
-      - name: Debug added contributors
-        run: |
-          echo "hi hello" ${{ steps.compare-files.outputs.added_contributors }}                       
+            }                   
       - name: Display welcome message
-        if: ${{steps.compare-files.outputs.added_contributors != ''}}
+        if: ${{ steps.compare-files.outputs.added_contributors }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
