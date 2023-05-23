@@ -56,7 +56,8 @@ jobs:
               core.info(`Removed Contributers : ${removed}`)
             }
       - name: Debug added contributors
-        run: echo Added contributors: ${{ steps.compare-files.outputs.added_contributors }}                       
+        run: |
+          echo "hi hello" ${{ steps.compare-files.outputs.added_contributors }}                       
       - name: Display welcome message
         if: ${{steps.compare-files.outputs.added_contributors != ''}}
         uses: actions/github-script@v6
