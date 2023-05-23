@@ -56,7 +56,6 @@ jobs:
               core.info(`Removed Contributers : ${removed}`)
             }                        
       - name: Display welcome message
-        if: steps.compare-files.outputs.added_contributors != ''
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
