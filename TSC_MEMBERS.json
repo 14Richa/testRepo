@@ -217,5 +217,16 @@
 		"repos": [
 			"cupid"
 		]
+	},
+	{
+		"name": "b1223",
+		"github": "rsdha",
+		"linkedin": "arjungarg17",
+		"slack": "U01QX79S734",
+		"twitter": "ArjunGarg07",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
 	}				
 ]
