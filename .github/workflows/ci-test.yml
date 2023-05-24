@@ -58,7 +58,7 @@ jobs:
               core.info(`Added Contributers : ${JSON.stringify(added, null, 2)}`, {
                 color: "red",
               });
-              core.setOutput("added_contributors", added.map((obj) => obj.github).join(","));
+              core.setOutput("new_contributors", added.map((obj) => obj.github).join(","));
             }
             if (removed.length > 0) {
               core.info(`Removed Contributers : ${JSON.stringify(removed, null, 2)}`, {
