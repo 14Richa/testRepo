@@ -2,16 +2,10 @@ name: Welcome New Contributor
 on:
   pull_request:
     types: [closed]
-    paths:
+    paths: 
       - 'TSC_MEMBERS.json'
-    branches:
-      - main
-    # Only run the workflow when the pull request is merged
-    # into the main branch
-    merged: true
 jobs:
   welcome:
-    if: github.event.pull_request.merged 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main branch 
@@ -40,7 +34,7 @@ jobs:
           echo "TSC members in new branch:"
           cat ./testRepo/TSC_MEMBERS.json
           ls -l ./testRepo/TSC_MEMBERS.json
-
+          
       - name: Print working directory
         run: |
           pwd
