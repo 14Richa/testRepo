@@ -67,7 +67,7 @@ jobs:
               core.setOutput("removed", "true");
             }
             core.info('TSC members in main branch:');
-            echo testRepo-main/TSC_MEMBERS.json
+            cat testRepo-main/TSC_MEMBERS.json
             core.info('Location of TSC members in main branch:');
             ls -l testRepo/TSC_MEMBERS.json
 
