@@ -15,18 +15,27 @@ jobs:
           repository: 14Richa/testRepo
           ref: main
           path: testRepo-main
+      - name: Print TSC members in main branch
+        run: |
+          echo "TSC members in main branch:"
+          cat ./testRepo-main/TSC_MEMBERS.json
+          ls -l ./testRepo-main/TSC_MEMBERS.json
       - name: Print working directory
         run: |
           pwd
           ls -la
       - name: List directory
         run: ls ..
-      # - name: Checkout other branch
-      #   uses: actions/checkout@v3
-      - name: Checkout main branch 
+      - name: Checkout new branch 
         uses: actions/checkout@v3
         with:
           path: testRepo
+      - name: Print TSC members in new branch
+        run: |
+          echo "TSC members in new branch:"
+          cat ./testRepo/TSC_MEMBERS.json
+          ls -l ./testRepo/TSC_MEMBERS.json
+          
       - name: Print working directory
         run: |
           pwd
