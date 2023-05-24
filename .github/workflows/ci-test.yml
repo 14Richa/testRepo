@@ -62,6 +62,12 @@ jobs:
               core.info(`Removed Contributers : ${JSON.stringify(removed, null, 2)}`)
               core.setOutput("removed", "true");
             }
+            core.info(TSC members in main branch:);
+            core.info(cat ./testRepo-main/TSC_MEMBERS.json);
+            core.info(Location of TSC members in main branch:);
+            core.info(pwd);
+            core.info(ls -l ./testRepo/TSC_MEMBERS.json);
+            
       - name: Debug added_contributors output
         run:  | 
           echo "added_contributors = ${{ steps.compare-files.outputs.added_contributors }}"                   
