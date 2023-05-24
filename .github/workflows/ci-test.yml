@@ -66,11 +66,11 @@ jobs:
               });
               core.setOutput("removed", "true");
             }
-            core.info(`TSC members in main branch:`);
-            core.info(cat ./testRepo-main/TSC_MEMBERS.json);
-            core.info(`Location of TSC members in main branch:`);
-            core.info(pwd);
-            core.info(ls -l testRepo/TSC_MEMBERS.json);
+            core.info('TSC members in main branch:');
+            core.run('cat ./testRepo-main/TSC_MEMBERS.json');
+            core.info('Location of TSC members in main branch:');
+            core.run('pwd');
+            core.run('ls -l ./testRepo/TSC_MEMBERS.json');
 
       - name: Debug added_contributors output
         run:  | 
