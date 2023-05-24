@@ -55,21 +55,21 @@ jobs:
               (oldObj) => !new_file.some((newObj) => newObj.github === oldObj.github)
             );
             if (added.length > 0) {
-              core.info(`Added Contributers : ${JSON.stringify(added, null, 2)}`, {
+              core.info(`Added Contributors : ${JSON.stringify(added, null, 2)}`, {
                 color: "red",
               });
               core.setOutput("newContributors", added.map((obj) => obj.github).join(","));
             }
             if (removed.length > 0) {
-              core.info(`Removed Contributers : ${JSON.stringify(removed, null, 2)}`, {
+              core.info(`Removed Contributors : ${JSON.stringify(removed, null, 2)}`, {
                 color: "red",
               });
               core.setOutput("removed", "true");
             }
             core.info('TSC members in main branch:');
-            cat testRepo-main/TSC_MEMBERS.json
+            core.info(JSON.stringify(main_file, null, 2));
             core.info('Location of TSC members in main branch:');
-            ls -l testRepo/TSC_MEMBERS.json
+            core.info(fs.realpathSync('./testRepo/TSC_MEMBERS.json'));
 
       - name: Debug newContributors output
         run:  | 
