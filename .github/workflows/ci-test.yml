@@ -58,7 +58,7 @@ jobs:
               core.info(`Added Contributers : ${JSON.stringify(added, null, 2)}`, {
                 color: "red",
               });
-              core.setOutput("new_contributors", added.map((obj) => obj.github).join(","));
+              core.setOutput("newContributors", added.map((obj) => obj.github).join(","));
             }
             if (removed.length > 0) {
               core.info(`Removed Contributers : ${JSON.stringify(removed, null, 2)}`, {
@@ -71,16 +71,16 @@ jobs:
             core.info('Location of TSC members in main branch:');
             ls -l testRepo/TSC_MEMBERS.json
 
-      - name: Debug added_contributors output
+      - name: Debug newContributors output
         run:  | 
-          echo "added_contributors = ${{ steps.compare-files.outputs.added_contributors }}"                   
+          echo "newContributors = ${{ steps.compare-files.outputs.newContributors }}"                   
       - name: Display welcome message
-        if: ${{ steps.compare-files.outputs.added_contributors != '' }}
+        if: ${{ steps.compare-files.outputs.newContributors != '' }}
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const newContributors = `${{steps.compare-files.outputs.added_contributors}}`.split(",");
+            const newContributors = `${{steps.compare-files.outputs.newContributors}}`.split(",");
             const welcomeMessage = newContributors.map((contributor) => `@${contributor.trim().replace(/^@/, '')} I have invited you to join the AsyncAPI organization and you will soon be added to the team that lists all TSC members.
             
             We use this team to mention in different discussions in different places in GitHub where TSC opinion is needed or even voting on some topic. Once TSC is mentioned:
