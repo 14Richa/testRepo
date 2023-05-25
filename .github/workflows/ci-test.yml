@@ -14,6 +14,10 @@ jobs:
         with:
           ref: main
           path: testRepo-main
+      - name: Reset master branch to last commit before merge
+        run: git reset HEAD^ --hard
+        working-directory: testRepo-main
+
       - name: Print TSC members in main branch
         run: |
           echo "TSC members in main branch:"
@@ -49,11 +53,11 @@ jobs:
             const fs = require("fs");
             const main_file = require('./testRepo-main/TSC_MEMBERS.json');
             const pr_file = require('./testRepo/TSC_MEMBERS.json');
-            const one_commit_before_master = require('./testRepo/TSC_MEMBERS.json');
+            
             const added = pr_file.filter(
-              (newObj) => !one_commit_before_master.some((oldObj) => oldObj.github === newObj.github)
+              (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
             );
-            const removed = one_commit_before_master.filter(
+            const removed = main_file.filter(
               (oldObj) => !pr_file.some((newObj) => newObj.github === oldObj.github)
             );
             if (added.length > 0) {
@@ -75,13 +79,7 @@ jobs:
             core.info('TSC members in PR branch:');
             core.info(JSON.stringify(pr_file, null, 2));
             core.info('Location of TSC members in PR branch:');
-            core.info(fs.realpathSync('./testRepo/PR/TSC_MEMBERS.json'));
-            core.info('TSC members in one commit before master branch:');
-            core.info(JSON.stringify(one_commit_before_master, null, 2));
-            core.info('Location of TSC members in one commit before master branch:');
             core.info(fs.realpathSync('./testRepo/TSC_MEMBERS.json'));
-
-
 
       - name: Debug newContributors output
         run:  | 
