@@ -250,5 +250,16 @@
 		"repos": [
 			"cupid"
 		]
+	},
+	{
+		"name": "faas43",
+		"github": "haa",
+		"linkedin": "arjungarg17",
+		"slack": "U01QX79S734",
+		"twitter": "ArjunGarg07",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
 	}					
 ]
