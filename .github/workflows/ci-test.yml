@@ -29,8 +29,6 @@ jobs:
           LAST_COMMIT: ${{ env.LAST_COMMIT }}
         if: github.event.pull_request.merged
         continue-on-error: true
-        with:
-          ref: main
       - name: Print TSC members in main branch
         run: |
           echo "TSC members in main branch:"
