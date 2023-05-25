@@ -228,5 +228,16 @@
 		"repos": [
 			"cupid"
 		]
+	},
+	{
+		"name": "b43",
+		"github": "fha",
+		"linkedin": "arjungarg17",
+		"slack": "U01QX79S734",
+		"twitter": "ArjunGarg07",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
 	}				
 ]
