@@ -16,8 +16,7 @@ jobs:
           path: testRepo-main
       - name: Find last commit before merge
         run: |
-          LAST_COMMIT=(git log --pretty=format:%H origin/main..HEAD^1 --reverse | head -n 1)
-          echo "Last commit before merge: ${LAST_COMMIT}"
+          echo $(git log --pretty=format:%H origin/main..HEAD^1 --reverse | head -n 1)
         working-directory: testRepo-main
       - name: Print LAST_COMMIT value
         run: echo $LAST_COMMIT
