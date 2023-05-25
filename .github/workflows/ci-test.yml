@@ -49,11 +49,11 @@ jobs:
             const fs = require("fs");
             const main_file = require('./testRepo-main/TSC_MEMBERS.json');
             const pr_file = require('./testRepo/TSC_MEMBERS.json');
-            const one_commit_behind_master = require('./testRepo-main@{1}/TSC_MEMBERS.json');
+            const one_commit_before_master = require('./testRepo-main@{-1}/TSC_MEMBERS.json');
             const added = pr_file.filter(
-              (newObj) => !one_commit_behind_master.some((oldObj) => oldObj.github === newObj.github)
+              (newObj) => !one_commit_before_master.some((oldObj) => oldObj.github === newObj.github)
             );
-            const removed = one_commit_behind_master.filter(
+            const removed = one_commit_before_master.filter(
               (oldObj) => !pr_file.some((newObj) => newObj.github === oldObj.github)
             );
             if (added.length > 0) {
@@ -76,10 +76,10 @@ jobs:
             core.info(JSON.stringify(pr_file, null, 2));
             core.info('Location of TSC members in PR branch:');
             core.info(fs.realpathSync('./testRepo/PR/TSC_MEMBERS.json'));
-            core.info('TSC members in one commit behind master branch:');
-            core.info(JSON.stringify(one_commit_behind_master, null, 2));
-            core.info('Location of TSC members in one commit behind master branch:');
-            core.info(fs.realpathSync('./testRepo-main@{1}/TSC_MEMBERS.json'));
+            core.info('TSC members in one commit before master branch:');
+            core.info(JSON.stringify(one_commit_before_master, null, 2));
+            core.info('Location of TSC members in one commit before master branch:');
+            core.info(fs.realpathSync('./testRepo-main@{-1}/TSC_MEMBERS.json'));
 
 
       - name: Debug newContributors output
