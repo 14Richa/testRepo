@@ -6,6 +6,7 @@ on:
       - 'TSC_MEMBERS.json'
 jobs:
   welcome:
+    if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main branch 
@@ -47,12 +48,13 @@ jobs:
           script: |
             const fs = require("fs");
             const main_file = require('./testRepo-main/TSC_MEMBERS.json');
-            const new_file = require('./testRepo/TSC_MEMBERS.json');
-            const added = new_file.filter(
-              (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
+            const pr_file = require('./testRepo/PR/TSC_MEMBERS.json');
+            const one_commit_behind_master = require('./testRepo-main@{1}/TSC_MEMBERS.json');
+            const added = pr_file.filter(
+              (newObj) => !one_commit_behind_master.some((oldObj) => oldObj.github === newObj.github)
             );
-            const removed = main_file.filter(
-              (oldObj) => !new_file.some((newObj) => newObj.github === oldObj.github)
+            const removed = one_commit_behind_master.filter(
+              (oldObj) => !pr_file.some((newObj) => newObj.github === oldObj.github)
             );
             if (added.length > 0) {
               core.info(`Added Contributors : ${JSON.stringify(added, null, 2)}`, {
@@ -70,6 +72,15 @@ jobs:
             core.info(JSON.stringify(main_file, null, 2));
             core.info('Location of TSC members in main branch:');
             core.info(fs.realpathSync('./testRepo/TSC_MEMBERS.json'));
+            core.info('TSC members in PR branch:');
+            core.info(JSON.stringify(pr_file, null, 2));
+            core.info('Location of TSC members in PR branch:');
+            core.info(fs.realpathSync('./testRepo/PR/TSC_MEMBERS.json'));
+            core.info('TSC members in one commit behind master branch:');
+            core.info(JSON.stringify(one_commit_behind_master, null, 2));
+            core.info('Location of TSC members in one commit behind master branch:');
+            core.info(fs.realpathSync('./testRepo-main@{1}/TSC_MEMBERS.json'));
+
 
       - name: Debug newContributors output
         run:  | 
