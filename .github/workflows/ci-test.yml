@@ -14,10 +14,14 @@ jobs:
         with:
           ref: main
           path: testRepo-main
-      - name: Reset master branch to last commit before merge
-        run: git reset HEAD^ --hard
+      - name: Find last commit before merge
+        run: |
+          LAST_COMMIT=$(git log --pretty=format:%H origin/main..HEAD^1 --reverse | head -n 1)
+          echo "Last commit before merge: ${LAST_COMMIT}"
         working-directory: testRepo-main
-
+      - name: Reset main branch to last commit before merge
+        run: git reset ${LAST_COMMIT} --hard
+        working-directory: testRepo-main
       - name: Print TSC members in main branch
         run: |
           echo "TSC members in main branch:"
