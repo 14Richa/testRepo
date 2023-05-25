@@ -49,7 +49,7 @@ jobs:
             const fs = require("fs");
             const main_file = require('./testRepo-main/TSC_MEMBERS.json');
             const pr_file = require('./testRepo/TSC_MEMBERS.json');
-            const one_commit_before_master = require('./testRepo-main@{-1}/TSC_MEMBERS.json');
+            const one_commit_before_master = require('./testRepo-main~1/TSC_MEMBERS.json');
             const added = pr_file.filter(
               (newObj) => !one_commit_before_master.some((oldObj) => oldObj.github === newObj.github)
             );
