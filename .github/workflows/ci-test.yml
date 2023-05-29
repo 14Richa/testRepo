@@ -14,11 +14,13 @@ jobs:
         with:
           ref: main
           path: testRepo-main
+      - name: Checkout one commit before last one
+        run: git checkout HEAD^
+        working-directory: testRepo-main
 
       - name: Checkout new branch
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           path: testRepo
 
       - name: Compare files
