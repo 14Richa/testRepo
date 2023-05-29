@@ -15,52 +15,11 @@ jobs:
           ref: main
           path: testRepo-main
 
-      - name: Find last commit before merge
-        id: last-commit
-        run: |
-          echo "LAST_COMMIT=$(git log --pretty=format:%H origin/main..HEAD^1 --reverse | head -n 1)" >> $GITHUB_ENV
-        working-directory: testRepo-main
-
-      - name: Print LAST_COMMIT value
-        run: echo $LAST_COMMIT
-
-      - name: Reset main branch to last commit before merge
-        run: git reset ${LAST_COMMIT} --hard
-        working-directory: testRepo-main
-
-      - name: Print TSC members in main branch
-        run: |
-          echo "TSC members in main branch:"
-          cat ./testRepo-main/TSC_MEMBERS.json
-          ls -l ./testRepo-main/TSC_MEMBERS.json
-
-      - name: Print working directory
-        run: |
-          pwd
-          ls -la
-
-      - name: List directory
-        run: ls ..
-
       - name: Checkout new branch
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           path: testRepo
-
-      - name: Print TSC members in new branch
-        run: |
-          echo "TSC members in new branch:"
-          cat ./testRepo/TSC_MEMBERS.json
-          ls -l ./testRepo/TSC_MEMBERS.json
-
-      - name: Print working directory
-        run: |
-          pwd
-          ls -la
-
-      - name: List directory
-        run: ls ..
 
       - name: Compare files
         id: compare-files
