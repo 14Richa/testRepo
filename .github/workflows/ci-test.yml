@@ -15,9 +15,11 @@ jobs:
           ref: main
           path: testRepo-main
       - name: Find last commit before merge
+        id: last-commit
         run: |
-          echo $(git log --pretty=format:%H origin/main..HEAD^1 --reverse | head -n 1)
+          echo "::set-env name=LAST_COMMIT::$(git log --pretty=format:%H origin/main..HEAD^1 --reverse | head -n 1)"
         working-directory: testRepo-main
+
       - name: Print LAST_COMMIT value
         run: echo $LAST_COMMIT
       - name: Reset main branch to last commit before merge
@@ -56,7 +58,7 @@ jobs:
         with:
           script: |
             const fs = require("fs");
-            const main_file = require('./testRepo-main/TSC_MEMBERS.json');
+            const main_file = require('./testRepo/TSC_MEMBERS.json');
             const pr_file = require('./testRepo/TSC_MEMBERS.json');
             
             const added = pr_file.filter(
