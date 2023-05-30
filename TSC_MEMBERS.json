@@ -470,5 +470,16 @@
 		"repos": [
 			"cupid"
 		]
-	}					
+	},
+	{
+		"name": "Saurav",
+		"github": "saurav9878",
+		"linkedin": "saurav-kr",
+		"slack": "U01QX79S734",
+		"twitter": "zentiasas",
+		"availableForHire": false,
+		"repos": [
+			"cupid"
+		]
+	}
 ]
