@@ -17,9 +17,7 @@ jobs:
       - name: Checkout one commit before last one
         with:
           fetch-depth: 2
-        run: git checkout HEAD^
-        working-directory: testRepo-main
-
+      - run: git checkout HEAD^
       - name: Checkout new branch
         uses: actions/checkout@v3
         with:
