@@ -19,6 +19,10 @@ jobs:
         with:
           fetch-depth: 2
       - run: git checkout HEAD^
+
+      - name: List testRepo-main directory
+        run: ls -la testRepo-main
+
       - name: Checkout new branch
         uses: actions/checkout@v3
         with:
