@@ -14,7 +14,10 @@ jobs:
         with:
           ref: main
           path: testRepo-main
+      - name: List of directory
+        run: ls -la
       - name: Checkout one commit before last one
+        uses: actions/checkout@v2
         with:
           fetch-depth: 2
       - run: git checkout HEAD^
