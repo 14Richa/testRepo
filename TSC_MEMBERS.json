@@ -472,23 +472,12 @@
 		]
 	},
 	{
-		"name": "Saurav",
-		"github": "saurav9878",
-		"linkedin": "saurav-kr",
+		"name": "Sarav",
+		"github": "sauav9878",
+		"linkedin": "saurv-kr",
 		"slack": "U01QX79S734",
-		"twitter": "zentiasas",
+		"twitter": "zentisas",
 		"availableForHire": false,
-		"repos": [
-			"cupid"
-		]
-	},
-	{
-		"name": "Rissarmaa",
-		"github": "bu8ibul19a",
-		"linkedin": "arjungarg17a",
-		"slack": "U01QX79S734a",
-		"twitter": "ArjunGarg07a",
-		"availableForHire": true,
 		"repos": [
 			"cupid"
 		]
