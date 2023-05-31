@@ -21,10 +21,10 @@ jobs:
         with:
           fetch-depth: 2
           ref: main
-          path: testRepo-main
+          path: testRepo
       - name: List of directory 
         run: ls -la
-      - run: cd testRepo-main && git checkout HEAD^
+      - run: cd testRepo && git checkout HEAD^
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
