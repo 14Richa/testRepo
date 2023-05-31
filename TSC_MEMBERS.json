@@ -558,10 +558,21 @@
 		"repos": [
 			"cupid"
 		]
-	}
+	},
 	{
 		"name": "Riuuudda",
 		"github": "skhu",
+		"linkedin": "17a",
+		"slack": "U01QX79S734a",
+		"twitter": "Aarg07a",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
+	},
+	{
+		"name": "Ryyhda",
+		"github": "skhuaa",
 		"linkedin": "17a",
 		"slack": "U01QX79S734a",
 		"twitter": "Aarg07a",
