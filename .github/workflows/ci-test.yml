@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 2
           ref: main
-          path: testRepo
+          path: testRepo-main
       - name: List of directory 
         run: ls -la
       - run: cd testRepo && git checkout HEAD^
@@ -38,7 +38,7 @@ jobs:
               (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
             );
             const removed = main_file.filter(
-              (newObj) => !pr_file.some((oldObj) => newObj.github === oldObj.github)
+              (oldObj) => !pr_file.some((newObj) => newObj.github === oldObj.github)
             );
 
             if (added.length > 0) {
