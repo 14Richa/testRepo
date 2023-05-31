@@ -38,7 +38,7 @@ jobs:
               (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
             );
             const removed = main_file.filter(
-              (oldObj) => !pr_file.some((newObj) => newObj.github === oldObj.github)
+              (newObj) => !pr_file.some((oldObj) => newObj.github === oldObj.github)
             );
 
             if (added.length > 0) {
