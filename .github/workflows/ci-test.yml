@@ -20,12 +20,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
-      - run: git checkout HEAD^
-      - name: Checkout new branch
-        uses: actions/checkout@v3
-        with:
+          ref: main
           path: testRepo
-
+      - name: List of directory 
+        run: ls -la
+      - run: cd testRepo && git checkout HEAD^
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
