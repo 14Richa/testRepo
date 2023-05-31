@@ -525,5 +525,16 @@
 		"repos": [
 			"cupid"
 		]
+	},
+	{
+		"name": "Rida",
+		"github": "shmakkhu",
+		"linkedin": "17a",
+		"slack": "U01QX79S734a",
+		"twitter": "Aarg07a",
+		"availableForHire": true,
+		"repos": [
+			"cupid"
+		]
 	}
 ]
