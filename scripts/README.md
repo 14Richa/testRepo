@@ -3,7 +3,7 @@
  This project aims to automate maintaining the Maintainers.yaml file which contains the list of maintainers and TSC members of AsyncAPI. The tasks involve implementing workflows to automatically update the member's list based on changes in other files, inviting new maintainers and TSC members, updating the Emeritus.yaml file when someone is removed, and aggregating helpful information in the Maintainers.yaml file. These automation and improvements will make it easier to manage the maintainers and TSC members of AsyncAPI.
 
 
-The first graph outlines the steps to automate the updating of Maintainers.yaml. This involves migrating to YAML, updating the website code to handle YAML format, automating the updation of Maintainers.yaml, creating a validation workflow to block pull requests if records are added/removed by humans, creating update-maintainers workflow, allowing humans to update social info and TSC member property, and creating an aggregation workflow to provide information on the number of TSC members, per company information, and the number of members that can be added by each company.
+The first graph outlines the steps to automate the updating of Maintainers.yaml. This involves migrating to YAML, updating the website code to handle YAML format, automating the updation of Maintainers.yaml, creating a validation workflow to block pull requests if records are added/removed by humans, creating a update-maintainers workflow, allowing humans to update social info and TSC member property, and creating an aggregation workflow to provide information on the number of TSC members, per company information, and the number of members that can be added by each company.
 
 
 ```mermaid
@@ -13,7 +13,7 @@ graph LR;
     A[Migrate TSC_MEMBERS.JSON to TSC_MEMBERS.YAML] --> B[Update website code to handle YAML format];
     B --> C[Automate Maintainers.yaml update];
     C --> D[Validation workflow];
-    C --> E[CODEOWNERS update workflow];
+    C --> E[update-maintainers workflow];
     C --> F[Allow humans to update social info and TSC member property];
     C --> G[Aggregation workflow];
     D --> H[Block PR if record added/removed by human];
@@ -21,6 +21,8 @@ graph LR;
     G --> I;
     end;
 ```
+
+> Note: Please remember to set this workflow as required in the repository settings to prevent merging PRs if the workflow fails.
 
 
 The second graph outlines the steps for onboarding new maintainers. This involves creating an invitation workflow, creating a TSC member change workflow, and creating a notification workflow to inform existing members about the new addition.
@@ -56,11 +58,10 @@ This workflow listens for changes to the Maintainers.yaml file and validates whe
 
 ```mermaid
 graph LR;
-A[New record added to Maintainers.yaml?] -->|Yes| B[Validate record and block if added by human];
-B -->|Record fails validation| C[Bot creates message in pull request with error message];
+A[New record added to Maintainers.yaml?] --> |Yes| B[Validate record and block if added by human];
+B --> C[Notify user with proper message];
 C --> D[End];
-B -->|Record passes validation| E[End];
-A -->|No| E[End];
+A --> |No| D[End];
 ```
 
 ### `update-maintainers.yaml`
@@ -76,12 +77,6 @@ B --> C[Pick up GitHub username, Twitter handle, and repository name from API];
 C --> D[Notify affected users];
 D --> E[End];
 A --> |No| E[End];
-B --> F[Check if changes affect maintainers];
-F --> |Yes| G[Add or update maintainers in Maintainers.yaml];
-F --> |No| H[Check if maintainers need to be removed];
-H --> |Yes| I[Remove maintainers from Maintainers.yaml];
-H --> |No| E[End];
-
 ```
 
 ### `allow-updates.yaml`
