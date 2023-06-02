@@ -23,7 +23,6 @@ sequenceDiagram
     C->>F: Allow humans to update social info and TSC member property
     D->>H: Block PR if record added/removed by human
     E->>E: Update Maintainers.yaml
-l
 
 ```
 
