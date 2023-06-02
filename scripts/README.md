@@ -14,9 +14,7 @@ sequenceDiagram
     participant D as "Validation workflow"
     participant E as "Update Maintainers.yaml"
     participant F as "Allow humans to update social info and TSC member property"
-    participant G as "Aggregation workflow"
     participant H as "Block PR if record added/removed by human"
-    participant I as "Update Maintainers.yaml"
 
     A->>B: Migrate TSC_MEMBERS.JSON to TSC_MEMBERS.YAML
     B->>C: Update website code to handle YAML format
@@ -24,7 +22,8 @@ sequenceDiagram
     C->>E: Start Update Maintainers.yaml workflow
     C->>F: Allow humans to update social info and TSC member property
     D->>H: Block PR if record added/removed by human
-    E->>I: Update Maintainers.yaml
+    E->>E: Update Maintainers.yaml
+l
 
 ```
 
