@@ -3,27 +3,32 @@
  This project aims to automate maintaining the Maintainers.yaml file which contains the list of maintainers and TSC members of AsyncAPI. The tasks involve implementing workflows to automatically update the member's list based on changes in other files, inviting new maintainers and TSC members, updating the Emeritus.yaml file when someone is removed, and aggregating helpful information in the Maintainers.yaml file. These automation and improvements will make it easier to manage the maintainers and TSC members of AsyncAPI.
 
 
-The first graph outlines the steps to automate the updating of Maintainers.yaml. This involves migrating to YAML, updating the website code to handle YAML format, automating the updation of Maintainers.yaml, creating a validation workflow to block pull requests if records are added/removed by humans, creating a update-maintainers workflow, allowing humans to update social info and TSC member property, and creating an aggregation workflow to provide information on the number of TSC members, per company information, and the number of members that can be added by each company.
+The first graph outlines the steps to automate the updating of Maintainers.yaml. This involves migrating to YAML, updating the website code to handle YAML format, automating the updation of Maintainers.yaml, creating a validation workflow to block pull requests if records are added/removed by humans, creating an update-maintainers workflow, and allowing humans to update social info and TSC member property.
 
 
 ```mermaid
-sequenceDiagram
-    participant A as "Migrate TSC_MEMBERS.JSON to TSC_MEMBERS.YAML"
-    participant B as "Update website code to handle YAML format"
-    participant C as "Automate Maintainers.yaml update"
-    participant D as "Validation workflow"
-    participant E as "Update Maintainers.yaml"
-    participant F as "Allow humans to update social info and TSC member property"
-    participant H as "Block PR if record added/removed by human"
+graph LR;
 
-    A->>B: Migrate TSC_MEMBERS.JSON to TSC_MEMBERS.YAML
-    B->>C: Update website code to handle YAML format
-    C->>D: Start Validation workflow
-    C->>E: Start Update Maintainers.yaml workflow
-    C->>F: Allow humans to update social info and TSC member property
-    D->>H: Block PR if record added/removed by human
-    E->>E: Update Maintainers.yaml
+subgraph Migrate TSC_MEMBERS.JSON to TSC_MEMBERS.YAML
+    A[Convert TSC_MEMBERS.JSON to TSC_MEMBERS.YAML]
+end
 
+subgraph Update website code to handle YAML format
+    B[Update website code to handle YAML format]
+end
+
+subgraph Automate Maintainers.yaml update
+    C[Automate Maintainers.yaml update]
+    D[Validation workflow]
+    E[update-maintainers workflow]
+    F[Allow humans to update social info and TSC member property]
+end
+
+A --> B
+B --> C
+C --> D
+C --> E
+C --> F
 ```
 
 
@@ -56,14 +61,15 @@ Overall, these subgraphs represent a comprehensive approach to maintaining and u
 
 This workflow listens for changes to the Maintainers.yaml file and validates whether the changes were made by the bot or a human. If a human made the changes, the workflow blocks the pull request and notifies the user with a proper message.
 
-> Note: This workflow should be located in every repository.
+> Note: This workflow should be located in every repository and should be made a required status check in the repository settings, so if it fails, PR cannot be merged.
 
 ```mermaid
 graph LR;
-A[New record added to Maintainers.yaml?] --> |Yes| B[Validate record and block if added by human];
-B --> C[Notify user with proper message];
-C --> D[End];
-A --> |No| D[End];
+A[New record added to Maintainers.yaml?] --> |Yes| B[Validate record];
+B --> |Validation failed| C[Block pull request];
+B --> |Validation passed| D[Continue with pull request];
+A --> |No| D[Continue with pull request];
+
 ```
 
 ### `update-maintainers.yaml`
@@ -74,11 +80,16 @@ This workflow listens for changes to the CODEOWNERS file and updates the Maintai
 
 ```mermaid
 graph TD;
-A[Changes made to CODEOWNERS file?] --> |Yes| B[Update Maintainers.yaml];
+A[Changes made to CODEOWNERS file?] --> |New maintainer added| B[Update Maintainers.yaml];
+A --> |Maintainer removed| F[Check if maintainer has other repositories];
 B --> C[Pick up GitHub username, Twitter handle, and repository name from API];
 C --> D[Notify affected users];
 D --> E[End];
-A --> |No| E[End];
+F --> |Maintainer has other repositories| G[Do not remove from Maintainers.yaml];
+F --> |Maintainer has no other repositories| H[Remove from Maintainers.yaml];
+H --> I[Notify affected users];
+I --> E;
+
 ```
 
 ### `allow-updates.yaml`
@@ -89,15 +100,20 @@ This workflow allows humans to update social info or the tsc_member property in 
 
 ```mermaid
 graph TD;
-A[User updates social info or tsc_member value?] --> |Yes| B[Allow update];
-B --> C[End];
-A --> |No| D[Block update and notify user];
-D --> E[End];
+subgraph Maintainers.yaml update workflow
+    A[User updates social info or tsc_member value?] --> |Yes| B[Allow update];
+    B --> C[Update Maintainers.yaml];
+    C --> D[Validate record];
+    D --> |Validation failed| E[Block update and notify user];
+    D --> |Validation passed| F[Notify affected users];
+    E --> G[End];
+    F --> G[End];
+end
 ```
 
 ### `invite-maintainers.yaml`
 
-This workflow is triggered when a new maintainer is added. It calls the GitHub API to invite the maintainer to the AsyncAPI organization and creates a new team for the maintainers. The workflow also adds the newmaintainer to the Maintainers GitHub team.
+This workflow is triggered when a new maintainer is added. It calls the GitHub API to invite the maintainer to the AsyncAPI organization and adds to an existing team for the maintainers. The workflow also adds the new maintainer to the Maintainers GitHub team.
 
 > Note: This workflow should be located in the community repository.
 
@@ -118,10 +134,15 @@ This workflow is triggered when there is a change to the tsc_member property. It
 
 ```mermaid
 graph TD;
-A[tsc_member value change?] --> |Yes| B[Add or remove member from tsc team];
-B --> C[Notify affected users];
-C --> D[End];
-A --> |No| D[End];
+    A[tsc_member value change?] --> |Yes| B[Add or remove member from TSC team?];
+    B --> |Add| C[Add member to TSC team];
+    B --> |Remove| D[Remove member from TSC team];
+    C --> E[Update TSC team membership];
+    D --> E[Update TSC team membership];
+    E --> F[Notify affected users];
+    F --> G[End];
+    A --> |No| G[End];
+
 ```
 
 ### `notify-tsc-members.yaml`
