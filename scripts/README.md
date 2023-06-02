@@ -7,22 +7,26 @@ The first graph outlines the steps to automate the updating of Maintainers.yaml.
 
 
 ```mermaid
-graph LR;
- subgraph Automate the updation of Maintainers.yaml
+sequenceDiagram
+    participant A as "Migrate TSC_MEMBERS.JSON to TSC_MEMBERS.YAML"
+    participant B as "Update website code to handle YAML format"
+    participant C as "Automate Maintainers.yaml update"
+    participant D as "Validation workflow"
+    participant E as "Update Maintainers.yaml"
+    participant F as "Allow humans to update social info and TSC member property"
+    participant G as "Aggregation workflow"
+    participant H as "Block PR if record added/removed by human"
+    participant I as "Update Maintainers.yaml"
 
-    A[Migrate TSC_MEMBERS.JSON to TSC_MEMBERS.YAML] --> B[Update website code to handle YAML format];
-    B --> C[Automate Maintainers.yaml update];
-    C --> D[Validation workflow];
-    C --> E[update-maintainers workflow];
-    C --> F[Allow humans to update social info and TSC member property];
-    C --> G[Aggregation workflow];
-    D --> H[Block PR if record added/removed by human];
-    E --> I[Update Maintainers.yaml];
-    G --> I;
-    end;
+    A->>B: Migrate TSC_MEMBERS.JSON to TSC_MEMBERS.YAML
+    B->>C: Update website code to handle YAML format
+    C->>D: Start Validation workflow
+    C->>E: Start Update Maintainers.yaml workflow
+    C->>F: Allow humans to update social info and TSC member property
+    D->>H: Block PR if record added/removed by human
+    E->>I: Update Maintainers.yaml
+
 ```
-
-> Note: Please remember to set this workflow as required in the repository settings to prevent merging PRs if the workflow fails.
 
 
 The second graph outlines the steps for onboarding new maintainers. This involves creating an invitation workflow, creating a TSC member change workflow, and creating a notification workflow to inform existing members about the new addition.
