@@ -14,23 +14,8 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Install YAML Lint
-        run: npm install yaml-lint
-
-      - name: Install ajv
-        run: npm install ajv
-
-      - name: Install axios
-        run: npm install axios
-
-      - name: Install js-yaml
-        run: npm install js-yaml
-
-      - name: Install fs
-        run: npm install fs
-
-      - name: List node_modules directory
-        run: ls -alh node_modules
+      - name: Install Dependencies
+        run: npm install yaml-lint ajv axios js-yaml
 
       - name: Lint YAML Files
         run: |
@@ -45,8 +30,40 @@ jobs:
           echo "$files"
 
       - name: Run YAML validation
-        run: |
-          set -e
-          node ./scripts/yaml-valid.js
-        env:
-          NODE_VERSION: '16.x'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            set -e
+            const Ajv = require("ajv");
+            const axios = require("axios");
+            const yaml = require("js-yaml");
+            const fs = require("fs").promises;
+
+            async function validateWorkflows() {
+              const schema = await axios.get(
+                "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json"
+              );
+
+              const files = await fs.readdir(".github/workflows");
+              const ymlFiles = files.filter((file) => file.endsWith(".yml"));
+
+              for (const file of ymlFiles) {
+                const content = await fs.readFile(`.github/workflows/${file}`, "utf8");
+                const target = yaml.load(content);
+
+                const ajv = new Ajv({ strict: false, allErrors: true });
+                const validator = ajv.compile(schema.data);
+                const valid = validator(target);
+                if (!valid) {
+                  console.error(
+                    `Validation failed for file '${file}' with the following errors:`
+                  );
+                  console.error(validator.errors);
+                  process.exitCode = 1;
+                } else {
+                  console.log(`Workflow in file '${file}' is valid`);
+                }
+              }
+            }
+
+            validateWorkflows();
