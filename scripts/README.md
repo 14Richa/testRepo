@@ -198,3 +198,24 @@ A[PR modifies Emeritus.yaml file?] --> |Yes| B[Review and merge PR];
 B --> C[End];
 A --> |No| C[End];
 ```
+
+#### Workflow Diagram: Interconnections between Workflows
+
+The following chart showcases the interconnections between different workflows that collectively automate the process of maintaining and updating the Maintainers.yaml file. It outlines the sequence of events when a new maintainer is added or removed from the CODEOWNERS file and how each workflow contributes to the overall flow of control.
+
+```mermaid 
+graph TD;
+    A[New maintainer added to CODEOWNERS file] -->|update-maintainers.yaml| B[Update Maintainers.yaml];
+    B -->|update-maintainers.yaml| C[Open PR with updated Maintainers.yaml];
+    C -->|allow-updates.yaml| D[Validate updates];
+    D -->|allow-updates.yaml| E[Merge PR];
+    E -->|invite-maintainers.yaml| F[Invite maintainer to TSC team];
+    F -->|notify-tsc-members.yaml| G[Notify TSC team about new member];
+
+    H[Maintainer removed from CODEOWNERS file] -->|update-maintainers.yaml| I[Update Maintainers.yaml];
+    I -->|update-maintainers.yaml| J[Open PR with updated Maintainers.yaml];
+    J -->|allow-updates.yaml| K[Validate updates];
+    K -->|allow-updates.yaml| L[Merge PR];
+    L -->|remove-from-organization.yaml| M[Remove maintainer from organization];
+    L -->|update-emeritus.yaml| N[Update Emeritus.yaml];
+```
