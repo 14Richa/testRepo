@@ -204,7 +204,7 @@ A --> |No| C[End];
 The following chart showcases the interconnections between different workflows that collectively automate the process of maintaining and updating the Maintainers.yaml file. It outlines the sequence of events when a new maintainer is added or removed from the CODEOWNERS file and how each workflow contributes to the overall flow of control.
 
 ```mermaid 
-graph TD;
+graph LR;
     A[New maintainer added to CODEOWNERS file] -->|update-maintainers.yaml| B[Update Maintainers.yaml];
     B -->|update-maintainers.yaml| C[Open PR with updated Maintainers.yaml];
     C -->|allow-updates.yaml| D[Validate updates];
