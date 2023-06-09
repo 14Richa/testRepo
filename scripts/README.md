@@ -31,8 +31,6 @@ C --> E
 C --> F
 ```
 
-theme: neutral
-
 
 The second graph outlines the steps for onboarding new maintainers. This involves creating an invitation workflow, creating a TSC member change workflow, and creating a notification workflow to inform existing members about the new addition.
 
