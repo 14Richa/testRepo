@@ -23,7 +23,7 @@ jobs:
         uses: peter-evans/create-issue-comment@v1
         if: ${{ failure() }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             Hi @${{ github.event.pull_request.user.login }},
