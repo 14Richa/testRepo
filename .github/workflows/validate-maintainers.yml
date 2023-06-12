@@ -12,6 +12,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+
       - name: Check for changes made by a bot
         run: |
           if [ "$(git log -1 --pretty=format:'%an' Maintainers.yaml)" != "github-actions[bot]" ]; then
@@ -25,16 +30,16 @@ jobs:
         uses: actions/github-script@v5
         if: ${{ failure() }}
         with:
-          github-token: ${{ secrets.BOT_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.pulls.update({
+            const { data: pull } = await github.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
               state: 'closed',
-              body: `Hi @${{ github.event.pull_request.user.login }}, changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been closed. 
-              Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.`
+              body: `Hi @${{ github.event.pull_request.user.login }}, changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been closed. Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.`
             });
+            console.log(`Closed pull request: ${pull.html_url}`);
 
 
 ## Added asyncapi bot account 
