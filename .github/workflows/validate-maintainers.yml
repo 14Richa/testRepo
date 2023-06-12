@@ -29,14 +29,20 @@ jobs:
             echo "Changes to Maintainers.yaml file were made by the bot, continuing with the workflow."
           fi
 
+          git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse pr-${{ github.event.pull_request.number }})" ]; then
+            echo "Error: Pull request has been closed by another process."
+            exit 1
+          fi
+
       - name: Close pull request if changes were made by a human
-        if: ${{ failure() }}
+        if: ${{ success() }}
         uses: actions/github-script@v6
         with:
           script: |
             const { Octokit } = require("@octokit/rest");
             const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-  
+
             octokit.pulls.update({
               owner: process.env.GITHUB_REPOSITORY.split("/")[0],
               repo: process.env.GITHUB_REPOSITORY.split("/")[1],
