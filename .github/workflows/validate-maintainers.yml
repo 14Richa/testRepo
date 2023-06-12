@@ -4,56 +4,21 @@ on:
   pull_request:
     paths:
       - 'Maintainers.yaml'
+    types:
+      - opened
+      - reopened
+      - edited
 
 jobs:
-  validate:
+  block_prs:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14.x'
-
-      - name: Install dependencies
-        run: npm install @octokit/rest
-
-      - name: Check for changes made by a bot
-        run: |
-          if [ "$(git log -1 --pretty=format:'%an' Maintainers.yaml)" != "github-actions[bot]" ]; then
-            echo "Error: Changes to Maintainers.yaml file must be made by the bot."
-            exit 1
-          else
-            echo "Changes to Maintainers.yaml file were made by the bot, continuing with the workflow."
-          fi
-
-          git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
-          if [ "$(git rev-parse HEAD)" != "$(git rev-parse pr-${{ github.event.pull_request.number }})" ]; then
-            echo "Error: Pull request has been closed by another process."
-            exit 1
-          fi
-
-      - name: Close pull request if changes were made by a human
-        if: ${{ success() }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { Octokit } = require("@octokit/rest");
-            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
-            octokit.pulls.update({
-              owner: process.env.GITHUB_REPOSITORY.split("/")[0],
-              repo: process.env.GITHUB_REPOSITORY.split("/")[1],
-              pull_number: process.env.GITHUB_EVENT_PULL_REQUEST_NUMBER,
-              state: "closed",
-              body: `Hi @${{ github.event.pull_request.user.login }}, changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been closed. Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.`,
-            }).then(() => {
-              console.log("Pull request closed successfully.");
-            }).catch((error) => {
-              console.error(`Error closing pull request: ${error.message}`);
-            });
+    - name: Check author of last commit in Maintainers.yaml
+      run: |
+        if [ "$(git log -1 --pretty=format:'%an' Maintainers.yaml)" != "github-actions[bot]" ]; then
+          echo "Error: Changes to Maintainers.yaml file must be made by the bot."
+          exit 1
+        fi
   
   
   ## Added asyncapi bot account 
