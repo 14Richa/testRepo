@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Check for changes made by a bot
         run: |
           if [ "$(git log -1 --pretty=format:'%an' Maintainers.yaml)" != "github-actions[bot]" ]; then
@@ -19,16 +20,21 @@ jobs:
           else
             echo "Changes to Maintainers.yaml file were made by the bot, continuing with the workflow."
           fi
-      - name: Block pull request if changes were made by a human
-        uses: peter-evans/create-issue-comment@v1
+
+      - name: Close pull request if changes were made by a human
+        uses: actions/github-script@v5
         if: ${{ failure() }}
         with:
-          token: ${{ secrets.BOT_TOKEN }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Hi @${{ github.event.pull_request.user.login }},
-            Changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been blocked. 
-            Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.
+          github-token: ${{ secrets.BOT_TOKEN }}
+          script: |
+            await github.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              state: 'closed',
+              body: `Hi @${{ github.event.pull_request.user.login }}, changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been closed. 
+              Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.`
+            });
 
 
 ## Added asyncapi bot account 
