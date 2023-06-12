@@ -28,22 +28,24 @@ jobs:
 
       - name: Close pull request if changes were made by a human
         if: ${{ failure() }}
-        script: |
-          const { Octokit } = require("@octokit/rest");
-          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
-          octokit.pulls.update({
-            owner: process.env.GITHUB_REPOSITORY.split("/")[0],
-            repo: process.env.GITHUB_REPOSITORY.split("/")[1],
-            pull_number: process.env.GITHUB_EVENT_PULL_REQUEST_NUMBER,
-            state: "closed",
-            body: `Hi @${{ github.event.pull_request.user.login }}, changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been closed. Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.`,
-          }).then(() => {
-            console.log("Pull request closed successfully.");
-          }).catch((error) => {
-            console.error(`Error closing pull request: ${error.message}`);
-          });
-
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { Octokit } = require("@octokit/rest");
+            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+  
+            octokit.pulls.update({
+              owner: process.env.GITHUB_REPOSITORY.split("/")[0],
+              repo: process.env.GITHUB_REPOSITORY.split("/")[1],
+              pull_number: process.env.GITHUB_EVENT_PULL_REQUEST_NUMBER,
+              state: "closed",
+              body: `Hi @${{ github.event.pull_request.user.login }}, changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been closed. Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.`,
+            }).then(() => {
+              console.log("Pull request closed successfully.");
+            }).catch((error) => {
+              console.error(`Error closing pull request: ${error.message}`);
+            });
+  
 
 ## Added asyncapi bot account 
 
