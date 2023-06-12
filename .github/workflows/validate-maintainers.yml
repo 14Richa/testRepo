@@ -17,6 +17,9 @@ jobs:
         with:
           node-version: '14.x'
 
+      - name: Install dependencies
+        run: npm install @octokit/rest
+
       - name: Check for changes made by a bot
         run: |
           if [ "$(git log -1 --pretty=format:'%an' Maintainers.yaml)" != "github-actions[bot]" ]; then
@@ -46,8 +49,8 @@ jobs:
               console.error(`Error closing pull request: ${error.message}`);
             });
   
-
-## Added asyncapi bot account 
+  
+  ## Added asyncapi bot account 
 
 # name: Validate Maintainers
 # on:
