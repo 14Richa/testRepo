@@ -27,19 +27,18 @@ jobs:
           fi
 
       - name: Close pull request if changes were made by a human
-        uses: actions/github-script@v5
         if: ${{ failure() }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: pull } = await github.pulls.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              state: 'closed',
-              body: `Hi @${{ github.event.pull_request.user.login }}, changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been closed. Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.`
-            });
-            console.log(`Closed pull request: ${pull.html_url}`);
+        run: |
+          const { Octokit } = require("@octokit/rest");
+          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+          await octokit.pulls.update({
+            owner: process.env.GITHUB_REPOSITORY.split("/")[0],
+            repo: process.env.GITHUB_REPOSITORY.split("/")[1],
+            pull_number: process.env.GITHUB_EVENT_PULL_REQUEST_NUMBER,
+            state: "closed",
+            body: `Hi @${{ github.event.pull_request.user.login }}, changes to the Maintainers.yaml file can only be made by the bot. Therefore, this pull request has been closed. Please make sure that any changes to the Maintainers.yaml file are made by the bot and not by a human.`,
+          });
 
 
 ## Added asyncapi bot account 
