@@ -26,25 +26,3 @@ jobs:
             -d '{"state":"closed"}'
           exit 1
         fi
-  
-  
-  ## Added asyncapi bot account 
-
-# name: Validate Maintainers
-# on:
-#   pull_request:
-#     paths:
-#       - 'Maintainers.yaml'
-
-# jobs:
-#   validate:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-#       - name: Check for changes made by the asyncapi-bot
-#         run: |
-#           if [ "$(git log -1 --pretty=format:'%an' Maintainers.yaml)" != "asyncapi-bot" ]; then
-#             echo "Error: Changes to Maintainers.yaml file must be made by the asyncapi-bot."
-#             exit 1
-#           fi
