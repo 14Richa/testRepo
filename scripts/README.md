@@ -61,7 +61,7 @@ Overall, these subgraphs represent a comprehensive approach to maintaining and u
 
 This workflow listens for changes to the Maintainers.yaml file and validates whether the changes were made by the bot or a human. If a human made the changes, the workflow blocks the pull request and notifies the user with a proper message.
 
-> Note: This workflow should be located in every repository and should be made a required status check in the repository settings, so if it fails, PR cannot be merged.
+> Note: This workflow should be located only in the community repository and should be made a required status check in the repository settings, so if it fails, PR cannot be merged.
 
 ```mermaid
 graph LR;
@@ -96,7 +96,7 @@ I --> E;
 
 This workflow allows humans to update social info or the tsc_member property in the Maintainers.yaml file.
 
-> Note: This workflow should be located in every repository.
+> Note: This workflow should be located only in the community repository.
 
 ```mermaid
 graph TD;
@@ -131,7 +131,7 @@ graph TD;
 
 This workflow is triggered when there is a change to the tsc_member property. It adds or removes the member from the TSC team based on the value of the property.
 
-> Note: This workflow should be located in every repository.
+> Note: This workflow should be located only in the community repository.
 
 ```mermaid
 graph TD;
