@@ -1,9 +1,8 @@
 name: Validate Maintainers
-
 on:
   pull_request:
     paths:
-      - 'Maintainers.yaml'
+      - "Maintainers.yaml"
     types:
       - opened
       - reopened
@@ -13,16 +12,28 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Check author of last commit in Maintainers.yaml
-      run: |
-        if [ "$(git log -1 --pretty=format:'%an' Maintainers.yaml)" != "github-actions[bot]" ]; then
-          echo "Error: Changes to Maintainers.yaml file must be made by the bot."
-          # Close the pull request using the GitHub REST API
-          curl -X PATCH -H "Authorization: Bearer ${{ secrets.BOT_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
-            -d '{"state":"closed"}'
-          exit 1
-        fi
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Check last committer
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ "$(git log -1 --pretty=format:'%an' ${{ github.event.inputs.path }})" != "asyncapi-bot" ]; then
+            echo "Error: Changes to ${{ github.event.inputs.path }} file must be made by the bot."
+
+            # Add a comment to the PR explaining why it was blocked
+            curl -s -X POST -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ env.REPO }}/issues/${{ env.PR_NUMBER }}/comments \
+              -d '{"body":"This PR was blocked because changes to Maintainers.yml should only be made by asyncapi-bot. Please revert your changes."}'
+
+            # Request changes to the PR to prevent merge
+            curl -X POST -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/repos/${{ env.REPO }}/pulls/${{ env.PR_NUMBER }}/reviews \
+              -d '{"event": "REQUEST_CHANGES", "body": "Changes to Maintainers.yml should only be made by asyncapi-bot."}'
+
+            exit 1
+          fi
