@@ -20,7 +20,7 @@ jobs:
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ "$(git log -1 --pretty=format:'%an' ${{ github.event.inputs.path }})" != "asyncapi-bot" ]; then
+          if [ "$(git log -1 --pretty=format:'%an' ${{ github.event.inputs.path }})" != "github-actions[bot]" ]; then
             echo "Error: Changes to ${{ github.event.inputs.path }} file must be made by the bot."
 
             # Add a comment to the PR explaining why it was blocked
