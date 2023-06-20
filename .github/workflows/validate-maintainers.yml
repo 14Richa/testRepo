@@ -13,7 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Check last committer
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -21,14 +23,16 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PATH: ${{ github.event.inputs.path }}
         run: |
-          if [ "$(git log -1 --pretty=format:'%an' $PATH)" != "asyncapi-bot" ]; then
-            echo "Error: Changes to $PATH file must be made by the bot."
+          if git diff --name-only HEAD~1 HEAD | grep -q $PATH; then
+            if git diff --unified=0 HEAD~1 HEAD $PATH | grep -qE '^[+-]{2}[[:space:]]*- name:'; then
+              echo "Error: Adding or removing a maintainer object is not allowed. Only updates to existing maintainer objects are allowed."
 
-            # Request changes to the PR to prevent merge
-            curl -X POST -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github.v3+json" \
-              https://api.github.com/repos/${{ env.REPO }}/pulls/${{ env.PR_NUMBER }}/reviews \
-              -d '{"event": "REQUEST_CHANGES", "body": "This PR was blocked because changes to Maintainers.yml should only be made by asyncapi-bot. Please revert your changes."}'
+              # Request changes to the PR to prevent merge
+              curl -X POST -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/${{ env.REPO }}/pulls/${{ env.PR_NUMBER }}/reviews \
+                -d '{"event": "REQUEST_CHANGES", "body": "This PR was blocked because adding or removing a maintainer object is not allowed. Only updates to existing maintainer objects are allowed. Please revert your changes."}'
 
-            exit 1
+              exit 1
+            fi
           fi
