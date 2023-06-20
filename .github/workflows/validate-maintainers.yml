@@ -12,17 +12,15 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Install git
-        run: sudo apt-get update && sudo apt-get install -y git
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Check last committer and changes made
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PATH: "MAINTAINERS.yml"
+          PATH: "Maintainers.yaml" # Hardcoded path
         run: |
           if [ "$(git log -1 --pretty=format:'%an' $PATH)" != "asyncapi-bot" ]; then
             # Fetch the changes made in the PR
