@@ -46,5 +46,13 @@
   - java-spring-cloud-stream-template
   - python-paho-template
   - bindings
-
+- name: on Rushton
+  github: CRushton
+  slack: U01DVKKAV5K
+  availableForHire: false
+  company: Solace
+  repos:
+  - java-spring-cloud-stream-template
+  - python-paho-template
+  - bindings
   
