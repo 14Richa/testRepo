@@ -23,7 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PATH: "Maintainers.yaml" # Hardcoded path
+          FILE_PATH: "Maintainers.yaml" # Renamed to FILE_PATH
         run: |
           set -ex
           
@@ -31,9 +31,9 @@ jobs:
           pwd
           ls -la
           
-          if [ "$(git log -1 --pretty=format:'%an' $PATH)" != "asyncapi-bot" ]; then
+          if [ "$(git log -1 --pretty=format:'%an' $FILE_PATH)" != "asyncapi-bot" ]; then
             # Fetch the changes made in the PR
-            changes=$(git diff --name-status ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- $PATH)
+            changes=$(git diff --name-status ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- $FILE_PATH)
             addition_count=$(echo "$changes" | grep -c '^A')
             deletion_count=$(echo "$changes" | grep -c '^D')
             
@@ -48,4 +48,11 @@ jobs:
                 -d '{"body":"This PR was blocked because new maintainer objects should only be added or removed by asyncapi-bot. Please revert your changes."}'
                 
               # Request changes to the PR to prevent merge
-              curl
+              curl -X POST -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/repos/${{ env.REPO }}/pulls/${{ env.PR_NUMBER }}/reviews \
+                -d '{"event": "REQUEST_CHANGES", "body": "New maintainer objects should only be added or removed by asyncapi-bot."}'
+              
+              exit 1
+            fi
+          fi
