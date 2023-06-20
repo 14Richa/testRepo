@@ -12,9 +12,12 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
+      - name: Install git
+        run: sudo apt-get update && sudo apt-get install -y git
+        
       - name: Checkout code
         uses: actions/checkout@v3
-
+        
       - name: Check last committer and changes made
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -22,6 +25,12 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PATH: "Maintainers.yaml" # Hardcoded path
         run: |
+          set -ex
+          
+          # Debugging: print working directory and list contents
+          pwd
+          ls -la
+          
           if [ "$(git log -1 --pretty=format:'%an' $PATH)" != "asyncapi-bot" ]; then
             # Fetch the changes made in the PR
             changes=$(git diff --name-status ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- $PATH)
@@ -31,19 +40,12 @@ jobs:
             # Check if a new maintainer object has been added or removed
             if [ $addition_count -gt 0 ] || [ $deletion_count -gt 0 ]; then
               echo "Error: A new maintainer object was added or removed by a non-bot user."
-
+              
               # Add a comment to the PR explaining why it was blocked
               curl -s -X POST -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
                 -H "Accept: application/vnd.github.v3+json" \
                 https://api.github.com/repos/${{ env.REPO }}/issues/${{ env.PR_NUMBER }}/comments \
                 -d '{"body":"This PR was blocked because new maintainer objects should only be added or removed by asyncapi-bot. Please revert your changes."}'
-
+                
               # Request changes to the PR to prevent merge
-              curl -X POST -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/repos/${{ env.REPO }}/pulls/${{ env.PR_NUMBER }}/reviews \
-                -d '{"event": "REQUEST_CHANGES", "body": "New maintainer objects should only be added or removed by asyncapi-bot."}'
-
-              exit 1
-            fi
-          fi
+              curl
