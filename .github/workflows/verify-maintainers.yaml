@@ -1,0 +1,48 @@
+name: Verify Maintainers
+
+on:
+  pull_request:
+    paths:
+      - 'Maintainers.yaml'
+
+jobs:
+  verify_changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Verify changes
+        id: verify_changes
+        run: |
+          # Get the diff of the Maintainers.yaml file
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          if echo "$CHANGED_FILES" | grep -q Maintainers.yaml; then
+            # Check if the changes were made by a bot
+            if git log -1 --pretty=%B | grep -q "Automated update"; then
+              echo "::set-output name=block_pr::false"
+            else
+              # Check if the changes involve critical attributes
+              if git diff --cached --name-only | grep -q "Maintainers.yaml"; then
+                # Check if any of the critical attributes have been modified
+                if git diff --cached -- "Maintainers.yaml" | awk '/^-/{flag=1}/^\+/{flag=0}flag' | awk '/^-[\t ]*(github|repos):/{exit 1}'; then
+                  echo "::set-output name=block_pr::false"
+                else
+                  # Check if any maintainer object has been removed
+                  if git diff --cached -- "Maintainers.yaml" | awk '/^[-+][\t ]*name:/{if (/^-/) {removed=1} else {removed=0}} END {exit removed}'; then
+                    echo "::set-output name=block_pr::true"
+                  else
+                    echo "::set-output name=block_pr::false"
+                  fi
+                fi
+              else
+                echo "::set-output name=block_pr::false"
+              fi
+            fi
+          else
+            echo "::set-output name=block_pr::false"
+          fi
+
+      - name: Pass pull request if changes do not involve critical attributes
+        if: steps.verify_changes.outputs.block_pr != 'true'
+        run: echo "Changes are valid. Pull request can continue."
