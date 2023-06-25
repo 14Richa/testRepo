@@ -5,7 +5,7 @@
   twitter: aayushmau5
   availableForHire: false
   repos:
-  - diff
+    - diff
 - name: Abir Pal
   linkedin: imabp
   slack: U01S8EQ9LQ2
@@ -13,7 +13,7 @@
   github: imabp
   availableForHire: false
   repos:
-  - problem
+    - problem
 - name: Akshat Nema
   github: akshatnema
   linkedin: akshat-nema
@@ -21,14 +21,14 @@
   twitter: AksNema
   availableForHire: true
   repos:
-  - website
+    - website
 - name: Anand Sunderraman
   github: anandsunderraman
   linkedin: anand-sunderraman-a6b7a131
   slack: U0231F9KXNK
   availableForHire: false
   repos:
-  - go-watermill-template
+    - go-watermill-template
 - name: Arjun Garg
   github: arjungarg07
   linkedin: arjungarg17
@@ -36,7 +36,4 @@
   twitter: ArjunGarg07
   availableForHire: true
   repos:
-  - cupid
-
-
-  
+    - cupid
