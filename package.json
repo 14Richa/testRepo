@@ -1,0 +1,23 @@
+{
+  "name": "testrepo",
+  "version": "1.0.0",
+  "description": "This repository contains examples of GitHub Actions that I have created and tested. The purpose of this repository is to showcase how GitHub Actions can be used to automate various tasks in a software development workflow.",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/14Richa/testRepo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/14Richa/testRepo/issues"
+  },
+  "homepage": "https://github.com/14Richa/testRepo#readme",
+  "dependencies": {
+    "js-yaml": "^4.2.2"
+  }
+}
+
