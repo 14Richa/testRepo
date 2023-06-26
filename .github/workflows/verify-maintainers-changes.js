@@ -1,5 +1,5 @@
 const { execSync } = require("child_process");
-const yaml = require("js-yaml");
+const yaml = require("yaml");
 const fs = require("fs");
 
 const prAuthor = process.argv[2];
@@ -13,13 +13,15 @@ if (prAuthor.includes("[async-bot]")) {
 // Fetch the Maintainers.yaml file before changes
 execSync("git fetch origin main");
 execSync("git checkout FETCH_HEAD -- Maintainers.yaml");
-const maintainersBefore = yaml.load(
+const maintainersBefore = yaml.parse(
   fs.readFileSync("Maintainers.yaml", "utf8")
 );
 
 // Reset to the current state
 execSync("git checkout HEAD Maintainers.yaml");
-const maintainersAfter = yaml.load(fs.readFileSync("Maintainers.yaml", "utf8"));
+const maintainersAfter = yaml.parse(
+  fs.readFileSync("Maintainers.yaml", "utf8")
+);
 
 // Compare repos arrays for each maintainer
 const beforeRepos = maintainersBefore.map(
