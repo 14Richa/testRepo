@@ -18,10 +18,7 @@ try {
     (maintainer) => maintainer.updated
   );
   const hasCriticalAttributeModifications = modifiedMaintainers.some(
-    (maintainer) =>
-      maintainer.github_username ||
-      maintainer.repository_keys ||
-      maintainer.removed
+    (maintainer) => maintainer.github || maintainer.repo || maintainer.removed
   );
 
   if (hasCriticalAttributeModifications) {
