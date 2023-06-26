@@ -54,7 +54,7 @@ Overall, these subgraphs represent a comprehensive approach to maintaining and u
 
 ### `verify-maintainers.yaml`
 
-This workflow listens for changes to the Maintainers.yaml file and verifies the legitimacy of the changes. It discerns between changes made by a bot and those made by a human. If a human has made changes that involve critical attributes, which include modifying fields such as the GitHub username, repository keys, or removing an entire maintainer object, the workflow blocks the pull request and notifies the user with an appropriate message.
+This workflow listens for changes to the Maintainers.yaml file and verifies the legitimacy of the changes. It discerns between changes made by a bot and those made by a human. If a human has made changes that involve critical attributes, which include modifying fields such as the GitHub username, repository keys, or removing/adding an entire maintainer object, the workflow blocks the pull request and notifies the user with an appropriate message.
 
 The workflow allows the pull request to continue if:
 
