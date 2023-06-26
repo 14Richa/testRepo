@@ -1,41 +1,22 @@
 name: Verify Maintainers Changes
+
 on:
   pull_request:
-    types: [opened, synchronize]
     paths:
       - "Maintainers.yaml"
 
 jobs:
-  verify_changes:
+  verify-changes:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: "14"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install js-yaml package
-        run: npm install js-yaml
-
-      - name: Run verification script
-        run: node verify-maintainers-changes.js
-
-      - name: Check verification status
-        id: verification
-        run: echo "::set-output name=status::$(cat verification-status.txt)"
-
-      - name: Block pull request if verification failed
-        if: steps.verification.outputs.status == 'failure'
-        run: |
-          echo "The Maintainers.yaml file contains invalid changes."
-          echo "Please ensure that critical attributes are not modified manually."
-
-      - name: Notify user if verification passed
-        if: steps.verification.outputs.status == 'success'
-        run: echo "Verification succeeded! The Maintainers.yaml file is valid."
+      - name: Verify changes
+        run: node .github/workflows/verify_changes.js ${{ github.event.pull_request.user.login }}
