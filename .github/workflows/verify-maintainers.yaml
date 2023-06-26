@@ -1,9 +1,9 @@
-name: Verify Maintainers
-
+name: Verify Maintainers Changes
 on:
   pull_request:
+    types: [opened, synchronize]
     paths:
-      - 'Maintainers.yaml'
+      - "Maintainers.yaml"
 
 jobs:
   verify_changes:
@@ -12,37 +12,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Verify changes
-        id: verify_changes
-        run: |
-          # Get the diff of the Maintainers.yaml file
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
-          if echo "$CHANGED_FILES" | grep -q Maintainers.yaml; then
-            # Check if the changes were made by a bot
-            if git log -1 --pretty=%B | grep -q "Automated update"; then
-              echo "::set-output name=block_pr::false"
-            else
-              # Check if the changes involve critical attributes
-              if git diff --cached --name-only | grep -q "Maintainers.yaml"; then
-                # Check if any of the critical attributes have been modified
-                if git diff --cached -- "Maintainers.yaml" | awk '/^-/{flag=1}/^\+/{flag=0}flag' | awk '/^-[\t ]*(github|repos):/{exit 1}'; then
-                  echo "::set-output name=block_pr::false"
-                else
-                  # Check if any maintainer object has been removed
-                  if git diff --cached -- "Maintainers.yaml" | awk '/^[-+][\t ]*name:/{if (/^-/) {removed=1} else {removed=0}} END {exit removed}'; then
-                    echo "::set-output name=block_pr::true"
-                  else
-                    echo "::set-output name=block_pr::false"
-                  fi
-                fi
-              else
-                echo "::set-output name=block_pr::false"
-              fi
-            fi
-          else
-            echo "::set-output name=block_pr::false"
-          fi
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
 
-      - name: Pass pull request if changes do not involve critical attributes
-        if: steps.verify_changes.outputs.block_pr != 'true'
-        run: echo "Changes are valid. Pull request can continue."
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run verification script
+        run: node verify-maintainers-changes.js
+
+      - name: Check verification status
+        id: verification
+        run: echo "::set-output name=status::$(cat verification-status.txt)"
+
+      - name: Block pull request if verification failed
+        if: steps.verification.outputs.status == 'failure'
+        run: |
+          echo "The Maintainers.yaml file contains invalid changes."
+          echo "Please ensure that critical attributes are not modified manually."
+
+      - name: Notify user if verification passed
+        if: steps.verification.outputs.status == 'success'
+        run: echo "Verification succeeded! The Maintainers.yaml file is valid."
