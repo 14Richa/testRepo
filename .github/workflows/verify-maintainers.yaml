@@ -22,7 +22,7 @@ jobs:
           node-version: "14"
 
       - name: Install dependencies
-        run: npm install js-yaml
+        run: npm install yaml
 
       - name: Verify changes
         run: node .github/workflows/verify-maintainers-changes.js ${{ github.event.pull_request.user.login }}
