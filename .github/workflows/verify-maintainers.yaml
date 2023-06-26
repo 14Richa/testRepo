@@ -19,4 +19,4 @@ jobs:
           node-version: "14"
 
       - name: Verify changes
-        run: node .github/workflows/verify_changes.js ${{ github.event.pull_request.user.login }}
+        run: node .github/workflows/verify-maintainers-changes.js ${{ github.event.pull_request.user.login }}
