@@ -21,7 +21,7 @@ jobs:
         run: npm install
 
       - name: Run verification script
-        run: node verify-maintainers-changes.js
+        run: node .github/workflows/verify-maintainers-changes.js
 
       - name: Check verification status
         id: verification
