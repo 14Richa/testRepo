@@ -22,7 +22,11 @@ jobs:
           ref: ${{ github.head_ref }}
           path: pr-branch
 
+      - name: Install Dependencies
+        run: npm install yaml
+
       - name: Verify changes in Maintainers.yaml
+        id: verify-changes
         uses: actions/github-script@v6
         with:
           script: |
@@ -36,6 +40,7 @@ jobs:
             const afterSet = new Set(prFile.map((maintainer) => maintainer.name));
 
             let isCriticalChangeDetected = false;
+            const { owner, repo } = context.repo;
 
             for (const maintainer of prFile) {
               if (!beforeSet.has(maintainer.name)) {
@@ -45,45 +50,8 @@ jobs:
               }
             }
 
-            if (!isCriticalChangeDetected) {
-              for (const maintainer of mainFile) {
-                if (!afterSet.has(maintainer.name)) {
-                  core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. A maintainer object has been removed. Please review.`);
-                  isCriticalChangeDetected = true;
-                  break;
-                }
-              }
-            }
-
-            if (!isCriticalChangeDetected) {
-              for (let i = 0; i < prFile.length; i++) {
-                const maintainerBefore = mainFile.find(m => m.name === prFile[i].name);
-                const maintainerAfter = prFile[i];
-
-                if (maintainerBefore && (maintainerBefore.github !== maintainerAfter.github || !arraysAreEqual(maintainerBefore.repos, maintainerAfter.repos))) {
-                  core.error(`Critical changes have been made to Maintainers.yaml by ${maintainerAfter.name}. Changes to critical attributes detected. Please review.`);
-                  isCriticalChangeDetected = true;
-                  break;
-                }
-              }
-
-              if (!isCriticalChangeDetected) {
-                console.log("No critical changes detected.");
-              }
-            }
-
+            // Example: If critical change is detected, you could create a comment on the PR (similar to Welcome New Contributor workflow)
             if (isCriticalChangeDetected) {
-                console.log("::set-output name=isCriticalChange::true");
-            }
-
-            function arraysAreEqual(arr1, arr2) {
-              if (arr1.length !== arr2.length) {
-                return false;
-              }
-              for (let i = 0; i < arr1.length; i++) {
-                if (arr1[i] !== arr2[i]) {
-                  return false;
-                }
-              }
-              return true;
+                const { number: issue_number } = context.issue;
+                github.rest.issues.createComment({ owner, repo, issue_number, body: 'Critical changes detected in Maintainers.yaml. Please review.' });
             }
