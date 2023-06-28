@@ -1,32 +1,3 @@
-# name: Verify Maintainers Changes
-
-# on:
-#   pull_request:
-#     paths:
-#       - "Maintainers.yaml"
-
-# jobs:
-#   verify-changes:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v2
-
-#       - name: Fetch all branches
-#         run: git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v2
-#         with:
-#           node-version: "14"
-
-#       - name: Install dependencies
-#         run: npm install yaml
-
-#       - name: Verify changes
-#         run: node .github/workflows/verify-maintainers-changes.js ${{ github.event.pull_request.user.login }}
-
 name: Verify Maintainers Changes
 
 on:
@@ -39,29 +10,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Fetch all branches
-        run: git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+      - name: Checkout main branch
+        uses: actions/checkout@v3
         with:
-          node-version: "14"
+          ref: main
+          path: repo-main
 
-      - name: Install dependencies
-        run: npm install yaml
+      - name: Checkout one commit before last one
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+          ref: main
+          path: repo-pr
+      - run: cd repo-pr && git checkout HEAD^
 
       - name: Verify changes
         id: verify
-        run: node .github/workflows/verify-maintainers-changes.js ${{ github.event.pull_request.user.login }}
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const verifyMaintainersChanges = require('./.github/workflows/verify-maintainers-changes.js');
+            const prAuthor = '${{ github.event.pull_request.user.login }}';
+            const mainPath = 'repo-main/MAINTAINERS.yaml';
+            const prPath = 'repo-pr/MAINTAINERS.yaml';
+            return verifyMaintainersChanges(prAuthor, mainPath, prPath);
         env:
-          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
 
       - name: Close PR and Comment
-        if: steps.verify.outputs.isCriticalChange == 'true'
+        if: steps.verify.outputs.result == 'true'
         uses: actions/github-script@v5
         with:
           github-token: ${{secrets.BOT_TOKEN}}
@@ -72,7 +49,6 @@ jobs:
               pull_number: ${{ github.event.pull_request.number }},
               state: 'closed'
             });
-
             github.rest.issues.createComment({
               owner: '14Richa',
               repo: 'testRepo',
