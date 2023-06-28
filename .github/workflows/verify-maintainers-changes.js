@@ -1,6 +1,6 @@
-const yaml = require("yaml");
 const fs = require("fs");
 const { execSync } = require("child_process");
+const jsYaml = require("js-yaml");
 
 async function verifyMaintainersChanges(prAuthor) {
     if (prAuthor.includes("[async-bot]")) {
@@ -11,10 +11,10 @@ async function verifyMaintainersChanges(prAuthor) {
     execSync("git fetch origin main");
     execSync("git checkout FETCH_HEAD -- Maintainers.yaml");
 
-    const maintainersBefore = yaml.parse(fs.readFileSync("Maintainers.yaml", "utf8"));
+    const maintainersBefore = jsYaml.load(fs.readFileSync("Maintainers.yaml", "utf8"));
 
     execSync("git checkout HEAD Maintainers.yaml");
-    const maintainersAfter = yaml.parse(fs.readFileSync("Maintainers.yaml", "utf8"));
+    const maintainersAfter = jsYaml.load(fs.readFileSync("Maintainers.yaml", "utf8"));
 
     const beforeSet = new Set(maintainersBefore.map((maintainer) => maintainer.name));
     const afterSet = new Set(maintainersAfter.map((maintainer) => maintainer.name));
