@@ -66,14 +66,14 @@ jobs:
         with:
           github-token: ${{secrets.BOT_TOKEN}}
           script: |
-            github.pulls.update({
+            github.rest.pulls.update({
               owner: '14Richa',
               repo: 'testRepo',
               pull_number: ${{ github.event.pull_request.number }},
               state: 'closed'
             });
 
-            github.issues.createComment({
+            github.rest.issues.createComment({
               owner: '14Richa',
               repo: 'testRepo',
               issue_number: ${{ github.event.pull_request.number }},
