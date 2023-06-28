@@ -29,7 +29,7 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const verifyMaintainersChanges = require('./.github/workflows/verify-maintainers-changes.js');
+            const verifyMaintainersChanges = require('./testRepo/.github/workflows/verify-maintainers-changes.js');
             const prAuthor = '${{ github.event.pull_request.user.login }}';
             const mainPath = 'repo-main/MAINTAINERS.yaml';
             const prPath = 'repo-pr/MAINTAINERS.yaml';
