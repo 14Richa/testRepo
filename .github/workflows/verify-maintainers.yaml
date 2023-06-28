@@ -16,23 +16,21 @@ jobs:
       - name: Fetch all branches
         run: git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "14"
-
-      - name: Install dependencies
-        run: npm install yaml
-
       - name: Verify changes
         id: verify
-        run: node .github/workflows/verify-maintainers-changes.js ${{ github.event.pull_request.user.login }}
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{secrets.BOT_TOKEN}}
+          script: |
+            const verifyMaintainersChanges = require('./.github/workflows/verify-maintainers-changes.js');
+            const isCriticalChange = await verifyMaintainersChanges('${{ github.event.pull_request.user.login }}');
+            return { isCriticalChange };
         env:
           PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
       - name: Close PR and Comment
-        if: steps.verify.outputs.isCriticalChange == 'true'
+        if: steps.verify.outputs.result.isCriticalChange == 'true'
         uses: actions/github-script@v5
         with:
           github-token: ${{secrets.BOT_TOKEN}}
