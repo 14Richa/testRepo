@@ -2,48 +2,88 @@ name: Verify Maintainers Changes
 
 on:
   pull_request:
+    types: [synchronize, opened]
     paths:
       - "Maintainers.yaml"
 
 jobs:
   verify-changes:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Fetch all branches
-        run: git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-
-      - name: Verify changes
-        id: verify
-        uses: actions/github-script@v5
+      - name: Checkout main branch
+        uses: actions/checkout@v3
         with:
-          github-token: ${{secrets.BOT_TOKEN}}
-          script: |
-            const verifyMaintainersChanges = require('./.github/workflows/verify-maintainers-changes.js');
-            const isCriticalChange = await verifyMaintainersChanges('${{ github.event.pull_request.user.login }}');
-            return { isCriticalChange };
-        env:
-          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          ref: main
+          path: main-branch
 
-      - name: Close PR and Comment
-        if: steps.verify.outputs.result.isCriticalChange == 'true'
-        uses: actions/github-script@v5
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
         with:
-          github-token: ${{secrets.BOT_TOKEN}}
+          ref: ${{ github.head_ref }}
+          path: pr-branch
+
+      - name: Verify changes in Maintainers.yaml
+        uses: actions/github-script@v6
+        with:
           script: |
-            github.rest.pulls.update({
-              owner: '14Richa',
-              repo: 'testRepo',
-              pull_number: ${{ github.event.pull_request.number }},
-              state: 'closed'
-            });
-            github.rest.issues.createComment({
-              owner: '14Richa',
-              repo: 'testRepo',
-              issue_number: ${{ github.event.pull_request.number }},
-              body: 'Critical changes have been made. This PR needs to be reviewed.'
-            });
+            const yaml = require("yaml");
+            const fs = require("fs");
+
+            const mainFile = yaml.parse(fs.readFileSync("./main-branch/Maintainers.yaml", "utf8"));
+            const prFile = yaml.parse(fs.readFileSync("./pr-branch/Maintainers.yaml", "utf8"));
+
+            const beforeSet = new Set(mainFile.map((maintainer) => maintainer.name));
+            const afterSet = new Set(prFile.map((maintainer) => maintainer.name));
+
+            let isCriticalChangeDetected = false;
+
+            for (const maintainer of prFile) {
+              if (!beforeSet.has(maintainer.name)) {
+                core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. A new maintainer object has been added. Please review.`);
+                isCriticalChangeDetected = true;
+                break;
+              }
+            }
+
+            if (!isCriticalChangeDetected) {
+              for (const maintainer of mainFile) {
+                if (!afterSet.has(maintainer.name)) {
+                  core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. A maintainer object has been removed. Please review.`);
+                  isCriticalChangeDetected = true;
+                  break;
+                }
+              }
+            }
+
+            if (!isCriticalChangeDetected) {
+              for (let i = 0; i < prFile.length; i++) {
+                const maintainerBefore = mainFile.find(m => m.name === prFile[i].name);
+                const maintainerAfter = prFile[i];
+
+                if (maintainerBefore && (maintainerBefore.github !== maintainerAfter.github || !arraysAreEqual(maintainerBefore.repos, maintainerAfter.repos))) {
+                  core.error(`Critical changes have been made to Maintainers.yaml by ${maintainerAfter.name}. Changes to critical attributes detected. Please review.`);
+                  isCriticalChangeDetected = true;
+                  break;
+                }
+              }
+
+              if (!isCriticalChangeDetected) {
+                console.log("No critical changes detected.");
+              }
+            }
+
+            if (isCriticalChangeDetected) {
+                console.log("::set-output name=isCriticalChange::true");
+            }
+
+            function arraysAreEqual(arr1, arr2) {
+              if (arr1.length !== arr2.length) {
+                return false;
+              }
+              for (let i = 0; i < arr1.length; i++) {
+                if (arr1[i] !== arr2[i]) {
+                  return false;
+                }
+              }
+              return true;
+            }
