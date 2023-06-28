@@ -50,7 +50,7 @@ jobs:
               }
             }
 
-            // Example: If critical change is detected, you could create a comment on the PR (similar to Welcome New Contributor workflow)
+            // Example: If critical change is detected, you could create a comment on the PR
             if (isCriticalChangeDetected) {
                 const { number: issue_number } = context.issue;
                 github.rest.issues.createComment({ owner, repo, issue_number, body: 'Critical changes detected in Maintainers.yaml. Please review.' });
