@@ -42,8 +42,8 @@ jobs:
 
             let isCriticalChangeDetected = false;
 
-            const owner = github.context.payload.repository.owner.login;
-            const repo = github.context.payload.repository.name;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
             for (const maintainer of prFile) {
               if (!beforeSet.has(maintainer.name)) {
@@ -55,7 +55,7 @@ jobs:
 
             // If critical change is detected, create a comment on the PR and close it.
             if (isCriticalChangeDetected) {
-                const { number: issue_number } = github.context.issue;
+                const { number: issue_number } = context.issue;
                 github.rest.issues.createComment({ owner, repo, issue_number, body: 'Critical changes detected in Maintainers.yaml. Please review.' });
 
                 // Close the PR
