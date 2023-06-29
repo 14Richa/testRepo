@@ -107,6 +107,9 @@ jobs:
           path: pr-branch
       - run: cd pr-branch && git checkout HEAD^
 
+      - name: Install Dependencies
+        run: npm install yaml
+
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v5
@@ -130,7 +133,7 @@ jobs:
             const removed = mainFile.filter((oldObj) => !prFile.some((newObj) => newObj.name === oldObj.name && JSON.stringify(newObj.repos) === JSON.stringify(oldObj.repos)));
 
             if (added.length > 0 || removed.length > 0) {
-              core.error(`Critical changes have been made to Maintainers.yaml. Maintainer or repos list has been added, modified or removed. Please review.`);
+              console.error(`Critical changes have been made to Maintainers.yaml. Maintainer or repos list has been added, modified or removed. Please review.`);
               isCriticalChangeDetected = true;
             }
 
