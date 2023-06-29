@@ -27,7 +27,7 @@ jobs:
 
       - name: Verify changes in Maintainers.yaml
         id: verify-changes
-        uses: actions/github-script@v6
+        uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
@@ -41,7 +41,9 @@ jobs:
             const afterSet = new Set(prFile.map((maintainer) => maintainer.name));
 
             let isCriticalChangeDetected = false;
-            const { owner, repo } = github.context.repo;
+
+            const owner = github.context.payload.repository.owner.login;
+            const repo = github.context.payload.repository.name;
 
             for (const maintainer of prFile) {
               if (!beforeSet.has(maintainer.name)) {
