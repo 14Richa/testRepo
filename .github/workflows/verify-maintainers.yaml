@@ -29,6 +29,7 @@ jobs:
         id: verify-changes
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             const yaml = require("yaml");
             const fs = require("fs");
@@ -40,7 +41,7 @@ jobs:
             const afterSet = new Set(prFile.map((maintainer) => maintainer.name));
 
             let isCriticalChangeDetected = false;
-            const { owner, repo } = context.repo;
+            const { owner, repo } = github.context.repo;
 
             for (const maintainer of prFile) {
               if (!beforeSet.has(maintainer.name)) {
@@ -52,9 +53,9 @@ jobs:
 
             // If critical change is detected, create a comment on the PR and close it.
             if (isCriticalChangeDetected) {
-                const { number: issue_number } = context.issue;
+                const { number: issue_number } = github.context.issue;
                 github.rest.issues.createComment({ owner, repo, issue_number, body: 'Critical changes detected in Maintainers.yaml. Please review.' });
-                
+
                 // Close the PR
                 github.rest.pulls.update({
                     owner,
