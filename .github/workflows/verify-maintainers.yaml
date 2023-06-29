@@ -37,17 +37,15 @@ jobs:
             const mainFile = yaml.parse(fs.readFileSync("./main-branch/Maintainers.yaml", "utf8"));
             const prFile = yaml.parse(fs.readFileSync("./pr-branch/Maintainers.yaml", "utf8"));
 
-            const beforeSet = new Set(mainFile.map((maintainer) => maintainer.name));
-            const afterSet = new Set(prFile.map((maintainer) => maintainer.name));
-
+            const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, maintainer.github]));
             let isCriticalChangeDetected = false;
 
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
+            const { owner, repo } = github.context.repo;
 
             for (const maintainer of prFile) {
-              if (!beforeSet.has(maintainer.name)) {
-                core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. A new maintainer object has been added. Please review.`);
+              const previousGithub = beforeMaintainers.get(maintainer.name);
+              if (!beforeMaintainers.has(maintainer.name) || (previousGithub && previousGithub !== maintainer.github)) {
+                core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. GitHub key has been modified or new maintainer has been added. Please review.`);
                 isCriticalChangeDetected = true;
                 break;
               }
@@ -55,8 +53,8 @@ jobs:
 
             // If critical change is detected, create a comment on the PR and close it.
             if (isCriticalChangeDetected) {
-                const { number: issue_number } = context.issue;
-                github.rest.issues.createComment({ owner, repo, issue_number, body: 'Critical changes detected in Maintainers.yaml. Please review.' });
+                const { number: issue_number } = github.context.issue;
+                github.rest.issues.createComment({ owner, repo, issue_number, body: 'Critical changes detected in Maintainers.yaml. GitHub key has been modified or new maintainer has been added. Please review.' });
 
                 // Close the PR
                 github.rest.pulls.update({
