@@ -37,7 +37,7 @@ jobs:
             const mainFile = yaml.parse(fs.readFileSync("./main-branch/Maintainers.yaml", "utf8"));
             const prFile = yaml.parse(fs.readFileSync("./pr-branch/Maintainers.yaml", "utf8"));
 
-            const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, maintainer.github]));
+            const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, {github: maintainer.github, repos: maintainer.repos || []}]));
             let isCriticalChangeDetected = false;
 
             const owner = "${{ github.repository_owner }}";
@@ -50,17 +50,26 @@ jobs:
             }
 
             for (const maintainer of prFile) {
-              const previousGithub = beforeMaintainers.get(maintainer.name);
-              if (!beforeMaintainers.has(maintainer.name) || (previousGithub && previousGithub !== maintainer.github)) {
-                core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. GitHub key has been modified or new maintainer has been added. Please review.`);
+              const previousData = beforeMaintainers.get(maintainer.name);
+              if (!previousData) {
+                core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. A new maintainer has been added. Please review.`);
                 isCriticalChangeDetected = true;
                 break;
+              } else {
+                const previousGithub = previousData.github;
+                const previousRepos = previousData.repos;
+
+                if (previousGithub !== maintainer.github || JSON.stringify(previousRepos) !== JSON.stringify(maintainer.repos || [])) {
+                  core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. GitHub key or repos list has been modified. Please review.`);
+                  isCriticalChangeDetected = true;
+                  break;
+                }
               }
             }
 
             // If critical change is detected, create a comment on the PR and close it.
             if (isCriticalChangeDetected) {
-                github.rest.issues.createComment({ owner, repo, issue_number: pull_number, body: 'Critical changes detected in Maintainers.yaml. A maintainer has been added, removed, or had their GitHub key modified. Please review.' });
+                github.rest.issues.createComment({ owner, repo, issue_number: pull_number, body: 'Critical changes detected in Maintainers.yaml. A maintainer has been added, removed, or had their GitHub key or repos list modified. Please review.' });
 
                 // Close the PR
                 github.rest.pulls.update({
