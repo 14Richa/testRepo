@@ -31,43 +31,42 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-  const yaml = require("yaml");
-  const fs = require("fs");
+            const yaml = require("yaml");
+            const fs = require("fs");
 
-  const mainFile = yaml.parse(fs.readFileSync("./main-branch/Maintainers.yaml", "utf8"));
-  const prFile = yaml.parse(fs.readFileSync("./pr-branch/Maintainers.yaml", "utf8"));
+            const mainFile = yaml.parse(fs.readFileSync("./main-branch/Maintainers.yaml", "utf8"));
+            const prFile = yaml.parse(fs.readFileSync("./pr-branch/Maintainers.yaml", "utf8"));
 
-  const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, maintainer.github]));
-  let isCriticalChangeDetected = false;
+            const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, maintainer.github]));
+            let isCriticalChangeDetected = false;
 
-  const owner = "${{ github.repository_owner }}";
-  const repo = "${{ github.event.repository.name }}";
-  const pull_number = "${{ github.event.pull_request.number }}";
+            const owner = "${{ github.repository_owner }}";
+            const repo = "${{ github.event.repository.name }}";
+            const pull_number = "${{ github.event.pull_request.number }}";
 
-  if (prFile.length < mainFile.length) {
-    core.error(`Critical changes have been made to Maintainers.yaml. A maintainer has been removed. Please review.`);
-    isCriticalChangeDetected = true;
-  }
+            if (prFile.length < mainFile.length) {
+              core.error(`Critical changes have been made to Maintainers.yaml. A maintainer has been removed. Please review.`);
+              isCriticalChangeDetected = true;
+            }
 
-  for (const maintainer of prFile) {
-    const previousGithub = beforeMaintainers.get(maintainer.name);
-    if (!beforeMaintainers.has(maintainer.name) || (previousGithub && previousGithub !== maintainer.github)) {
-      core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. GitHub key has been modified or new maintainer has been added. Please review.`);
-      isCriticalChangeDetected = true;
-      break;
-    }
-  }
+            for (const maintainer of prFile) {
+              const previousGithub = beforeMaintainers.get(maintainer.name);
+              if (!beforeMaintainers.has(maintainer.name) || (previousGithub && previousGithub !== maintainer.github)) {
+                core.error(`Critical changes have been made to Maintainers.yaml by ${maintainer.name}. GitHub key has been modified or new maintainer has been added. Please review.`);
+                isCriticalChangeDetected = true;
+                break;
+              }
+            }
 
-  // If critical change is detected, create a comment on the PR and close it.
-  if (isCriticalChangeDetected) {
-      github.rest.issues.createComment({ owner, repo, issue_number: pull_number, body: 'Critical changes detected in Maintainers.yaml. A maintainer has been added, removed, or had their GitHub key modified. Please review.' });
+            // If critical change is detected, create a comment on the PR and close it.
+            if (isCriticalChangeDetected) {
+                github.rest.issues.createComment({ owner, repo, issue_number: pull_number, body: 'Critical changes detected in Maintainers.yaml. A maintainer has been added, removed, or had their GitHub key modified. Please review.' });
 
-      // Close the PR
-      github.rest.pulls.update({
-          owner,
-          repo,
-          pull_number,
-          state: 'closed'
-      });
-  }
-
+                // Close the PR
+                github.rest.pulls.update({
+                    owner,
+                    repo,
+                    pull_number,
+                    state: 'closed'
+                });
+            }
