@@ -32,6 +32,8 @@ jobs:
           script: |
             const yaml = require("yaml");
             const fs = require("fs");
+            const core = require("@actions/core");
+            const github = require("@actions/github");
 
             const mainFile = yaml.parse(fs.readFileSync("./main-branch/Maintainers.yaml", "utf8"));
             const prFile = yaml.parse(fs.readFileSync("./pr-branch/Maintainers.yaml", "utf8"));
@@ -50,8 +52,16 @@ jobs:
               }
             }
 
-            // Example: If critical change is detected, you could create a comment on the PR
+            // If critical change is detected, create a comment on the PR and close it.
             if (isCriticalChangeDetected) {
                 const { number: issue_number } = context.issue;
                 github.rest.issues.createComment({ owner, repo, issue_number, body: 'Critical changes detected in Maintainers.yaml. Please review.' });
+                
+                // Close the PR
+                github.rest.pulls.update({
+                    owner,
+                    repo,
+                    pull_number: issue_number,
+                    state: 'closed'
+                });
             }
