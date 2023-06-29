@@ -40,7 +40,8 @@ jobs:
             const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, maintainer.github]));
             let isCriticalChangeDetected = false;
 
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+            const { number: pull_number, repository } = github.event;
+            const { owner, name: repo } = repository;
 
             for (const maintainer of prFile) {
               const previousGithub = beforeMaintainers.get(maintainer.name);
@@ -53,12 +54,11 @@ jobs:
 
             // If critical change is detected, create a comment on the PR and close it.
             if (isCriticalChangeDetected) {
-                const pull_number = github.event.number;
-                github.rest.issues.createComment({ owner, repo, issue_number: pull_number, body: 'Critical changes detected in Maintainers.yaml. GitHub key has been modified or new maintainer has been added. Please review.' });
+                github.rest.issues.createComment({ owner: owner.login, repo, issue_number: pull_number, body: 'Critical changes detected in Maintainers.yaml. GitHub key has been modified or new maintainer has been added. Please review.' });
 
                 // Close the PR
                 github.rest.pulls.update({
-                    owner,
+                    owner: owner.login,
                     repo,
                     pull_number,
                     state: 'closed'
