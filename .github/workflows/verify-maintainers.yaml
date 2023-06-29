@@ -40,8 +40,9 @@ jobs:
             const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, maintainer.github]));
             let isCriticalChangeDetected = false;
 
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
-            const pull_number = github.event.pull_request.number;
+            const owner = "${{ github.repository_owner }}";
+            const repo = "${{ github.event.repository.name }}";
+            const pull_number = "${{ github.event.pull_request.number }}";
 
             for (const maintainer of prFile) {
               const previousGithub = beforeMaintainers.get(maintainer.name);
