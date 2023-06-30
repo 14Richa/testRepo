@@ -14,11 +14,6 @@ jobs:
       - name: Checkout Current repository
         uses: actions/checkout@v2
 
-      - name: Install yaml2json
-        run: |
-          sudo apt-get install -y python3 python3-pip
-          pip3 install yaml2json
-
       - name: Convert YAML to JSON
         run: |
-          cat MAINTAINERS.yaml | yaml2json
+          python -c 'import sys, yaml, json; json.dump(yaml.safe_load(sys.stdin), sys.stdout, indent=4)' < MAINTAINERS.yaml
