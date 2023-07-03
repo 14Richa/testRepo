@@ -16,58 +16,40 @@ jobs:
         with:
           ref: main
           path: testRepo-main
-      - name: List of directory
-        run: ls -la
+
       - name: Checkout one commit before last one
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
           ref: main
           path: testRepo
-      - name: List of directory 
-        run: ls -la
+
       - run: cd testRepo && git checkout HEAD^
+
       - name: Install dependencies
         run: npm install js-yaml
+
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require("fs");
-            const yaml = require("js-yaml");
+            const fs = require('fs');
+            const yaml = require('js-yaml');
+            
             const main_file = yaml.load(fs.readFileSync('./testRepo-main/MAINTAINERS.yaml', 'utf8'));
             const pr_file = yaml.load(fs.readFileSync('./testRepo/MAINTAINERS.yaml', 'utf8'));
-
+            
             const removed = pr_file.filter(
               (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
             );
             const added = main_file.filter(
               (oldObj) => !pr_file.some((newObj) => newObj.github === oldObj.github)
             );
-
+            
             if (added.length > 0) {
-              core.info(`Added Maintainers: ${JSON.stringify(added, null, 2)}`, {
-                color: "red",
-              });
               core.setOutput("newMaintainers", added.map((obj) => obj.github).join(","));
             }
-
-            if (removed.length > 0) {
-              core.info(`Removed Maintainers: ${JSON.stringify(removed, null, 2)}`, {
-                color: "red",
-              });
-              core.setOutput("removed", "true");
-            }
-
-            core.info('Maintainers in main branch:');
-            core.info(JSON.stringify(main_file, null, 2));
-            core.info('Location of Maintainers in main branch:');
-            core.info(fs.realpathSync('./testRepo-main/MAINTAINERS.yaml'));
-            core.info('Maintainers in PR branch:');
-            core.info(JSON.stringify(pr_file, null, 2));
-            core.info('Location of Maintainers in PR branch:');
-            core.info(fs.realpathSync('./testRepo/MAINTAINERS.yaml'));
 
       - name: Debug newMaintainers output
         run: |
@@ -79,21 +61,17 @@ jobs:
         with:
           github-token: ${{ secrets.BOT_TOKEN }}
           script: |
-            const newMaintainers = core.getInput("newMaintainers").split(",");
-            const welcomeMessage = newMaintainers
-              .map(
-                (maintainer) => `@${maintainer.trim().replace(/^@/, '')} I have invited you to join the AsyncAPI organization and you will soon be added to the team that lists all Maintainers.
-                
-                We use this team to mention in different discussions in different places in GitHub where Maintainer's opinion is needed or even voting on some topic. Once Maintainers are mentioned:
-                
-                - You get GitHub notification
-                - We also drop notification in our slack in #95_bot-maintainers-mentioned channel
-                - We drop an email to people that subscribed to Maintainer news here https://www.asyncapi.com/community/maintainers
-                
-                Pick the channel for notifications that you prefer. Welcome aboard! We are excited to have you as part of the team.`
-              )
-              .join("\n");
-      
+            const newMaintainers = "${{ steps.compare-files.outputs.newMaintainers }}".split(",");
+            const welcomeMessage = newMaintainers.map((maintainer) => `@${maintainer.trim().replace(/^@/, '')} I have invited you to join the AsyncAPI organization and you will soon be added to the team that lists all Maintainers.
+            
+            We use this team to mention in different discussions in different places in GitHub where Maintainer's opinion is needed or even voting on some topic. Once Maintainers are mentioned:
+            
+            - You get GitHub notification
+            - We also drop notification in our slack in #95_bot-maintainers-mentioned channel
+            - We drop an email to people that subscribed to Maintainer news here https://www.asyncapi.com/community/maintainers
+            
+            Pick the channel for notifications that you prefer. Welcome aboard! We are excited to have you as part of the team.`).join("\n");
+            
             const { owner, repo } = context.repo;
             const { number: issue_number } = context.issue;
             return github.rest.issues.createComment({ owner, repo, issue_number, body: welcomeMessage });
