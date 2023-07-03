@@ -51,6 +51,8 @@ jobs:
               core.setOutput("newMaintainers", added.map((obj) => obj.github).join(","));
             }
 
+            core.info('Maintainers in main branch:\n' + yaml.dump(main_file));
+
       - name: Debug newMaintainers output
         run: |
           echo "newMaintainers = ${{ steps.compare-files.outputs.newMaintainers }}"
