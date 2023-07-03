@@ -13,8 +13,8 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v3
         with:
-          ref: master
-          path: community-main
+          ref: main
+          path: main-branch
 
       - name: Checkout PR branch
         uses: actions/checkout@v3
@@ -34,7 +34,7 @@ jobs:
             const yaml = require("yaml");
             const fs = require("fs");
 
-            const mainFile = yaml.parse(fs.readFileSync("./community-main/MAINTAINERS.yaml", "utf8"));
+            const mainFile = yaml.parse(fs.readFileSync("./main-branch/MAINTAINERS.yaml", "utf8"));
             const prFile = yaml.parse(fs.readFileSync("./pr-branch/MAINTAINERS.yaml", "utf8"));
 
             const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, {github: maintainer.github, repos: maintainer.repos || []}]));
