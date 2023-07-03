@@ -27,6 +27,8 @@ jobs:
       - name: List of directory 
         run: ls -la
       - run: cd testRepo && git checkout HEAD^
+      - name: Install dependencies
+        run: npm install js-yaml
       - name: Compare files
         id: compare-files
         uses: actions/github-script@v6
