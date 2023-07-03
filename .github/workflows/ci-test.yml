@@ -36,8 +36,8 @@ jobs:
           script: |
             const fs = require("fs");
             const yaml = require("js-yaml");
-            const main_file = yaml.safeLoad(fs.readFileSync('./testRepo-main/MAINTAINERS.yaml', 'utf8'));
-            const pr_file = yaml.safeLoad(fs.readFileSync('./testRepo/MAINTAINERS.yaml', 'utf8'));
+            const main_file = yaml.load(fs.readFileSync('./testRepo-main/MAINTAINERS.yaml', 'utf8'));
+            const pr_file = yaml.load(fs.readFileSync('./testRepo/MAINTAINERS.yaml', 'utf8'));
 
             const removed = pr_file.filter(
               (newObj) => !main_file.some((oldObj) => oldObj.github === newObj.github)
