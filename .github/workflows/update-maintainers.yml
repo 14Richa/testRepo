@@ -24,55 +24,39 @@ jobs:
       - name: Get added line
         id: get-line
         run: |
-          ADDED_LINE=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')
-          echo "::set-output name=added_line::$ADDED_LINE"
-          echo "Added Line: $ADDED_LINE"
+          ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')
+          echo "::set-output name=added_codeowner::$ADDED_CODEOWNER"
+          echo "Added Codeowner: $ADDED_CODEOWNER"
 
-      - name: Update MAINTAINERS.yaml with JavaScript
-        if: steps.get-line.outputs.added_line != ''
+      - name: Update MAINTAINERS.yaml
+        if: steps.get-line.outputs.added_codeowner != ''
         run: |
-          const fs = require('fs');
-          const yaml = require('js-yaml');
+          echo "${{ steps.get-line.outputs.added_codeowner }}" > added_codeowner.txt
+          echo 'const fs = require("fs");
+          const yaml = require("js-yaml");
 
-          // Read MAINTAINERS.yaml
-          const file = fs.readFileSync('MAINTAINERS.yaml', 'utf8');
-          const data = yaml.load(file);
+          const addedCodeowner = fs.readFileSync("added_codeowner.txt", "utf8").trim();
+          const maintainers = yaml.safeLoad(fs.readFileSync("MAINTAINERS.yaml", "utf8"));
 
-          // Parse added line
-          const addedLine = '${{ steps.get-line.outputs.added_line }}';
-          const name = addedLine.split(':')[1].trim();
-          const github = addedLine.split(':')[2].trim();
-          const slack = addedLine.split(':')[3].trim();
-          const availableForHire = addedLine.split(':')[4].trim();
-          const company = addedLine.split(':')[5].trim();
-          const isTscMember = addedLine.split(':')[6].trim();
-          const repos = addedLine.split(':')[7].trim().split(', ');
-
-          console.log(`Name: ${name}`);
-          console.log(`GitHub: ${github}`);
-          console.log(`Slack: ${slack}`);
-          console.log(`Available for Hire: ${availableForHire}`);
-          console.log(`Company: ${company}`);
-          console.log(`Is TSC Member: ${isTscMember}`);
-          console.log(`Repos: ${repos}`);
-
-          // Create new maintainer object
           const newMaintainer = {
-            name: name,
-            github: github,
-            slack: slack,
-            availableForHire: availableForHire === 'true',
-            company: company,
-            isTscMember: isTscMember === 'true',
-            repos: repos
+            name: "",
+            github: "",
+            slack: "",
+            availableForHire: false,
+            company: "",
+            isTscMember: false,
+            repos: []
           };
 
-          // Add new maintainer to the data
-          data.push(newMaintainer);
+          // Update newMaintainer object properties based on addedCodeowner content
 
-          // Write back to MAINTAINERS.yaml
-          fs.writeFileSync('MAINTAINERS.yaml', yaml.dump(data), 'utf8');
-          console.log('MAINTAINERS.yaml updated successfully');
+          maintainers.push(newMaintainer);
+
+          const updatedYaml = yaml.safeDump(maintainers);
+          fs.writeFileSync("MAINTAINERS.yaml", updatedYaml);
+          ' | node
+
+          rm added_codeowner.txt
 
       - name: Commit and push changes
         run: |
