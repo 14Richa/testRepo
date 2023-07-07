@@ -36,13 +36,19 @@ jobs:
           echo "  maintained_repository: 'testRepo'" >> MAINTAINERS.yaml
           cat MAINTAINERS.yaml
           echo "MAINTAINERS.yaml updated successfully"
-      - name: Commit and push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Configure Git
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+          
+      - name: Commit changes
+        run: |
           git add .
           git commit -m "Update latest maintainers list"
-          git remote set-url origin "https://github.com/14Richa/testRepo.git"
-          git push origin HEAD:main
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
