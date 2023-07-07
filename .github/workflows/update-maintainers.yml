@@ -25,21 +25,22 @@ jobs:
 
       - name: Get committer name
         id: get-committer-name
-        run: echo "COMMITTER_NAME=$(git log -1 --pretty=format:'%an')" >> $GITHUB_ENV
+        run: |
+          echo "COMMITTER_NAME=$(git log -1 --pretty=format:'%an')" >> $GITHUB_ENV
+          echo "Committer Name: $COMMITTER_NAME"
 
       - name: Update MAINTAINERS.yaml
         run: |
           echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
           echo "  name: \"$COMMITTER_NAME\"" >> MAINTAINERS.yaml
           echo "  maintained_repository: \"testRepo\"" >> MAINTAINERS.yaml
+          echo "MAINTAINERS.yaml updated successfully"
 
       - name: Commit changes
-        env:
-          GIT_COMMITTER_NAME: $COMMITTER_NAME
-          GIT_COMMITTER_EMAIL: ${{ github.actor }}@users.noreply.github.com
         run: |
-          git config --global user.name "$GIT_COMMITTER_NAME"
-          git config --global user.email "$GIT_COMMITTER_EMAIL"
+          git config --global user.name "${{ env.COMMITTER_NAME }}"
+          git config --global user.email "onlinericha19@gmail.com"
           git remote add auth_origin https://${{ github.actor }}:${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}
           git remote -v
           git push auth_origin HEAD:main
+          echo "Changes committed successfully"
