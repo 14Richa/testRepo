@@ -1,7 +1,8 @@
 name: Update MAINTAINERS.yaml
 
 on:
-  push:
+  pull_request:
+    types: [synchronize]
     paths:
       - 'CODEOWNERS'
 
@@ -16,7 +17,7 @@ jobs:
       - name: Check for new maintainers
         id: check-maintainers
         run: |
-          NEW_MAINTAINER=$(git diff HEAD~1 -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk '{print $NF}' | tr -d '@')
+          NEW_MAINTAINER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk '{print $NF}' | tr -d '@')
           echo "NEW_MAINTAINER=$NEW_MAINTAINER" >> $GITHUB_ENV
           if [ -n "$NEW_MAINTAINER" ]; then
             echo "::set-output name=new-maintainer::true"
