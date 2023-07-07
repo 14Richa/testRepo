@@ -25,41 +25,35 @@ jobs:
         run: npm install js-yaml@3.14.1
 
       - name: Get added codeowner
-        id: get-line
+        id: codeowner
         run: |
-          ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk -F'@' '{print $NF}' | awk '{print $1}')
-          echo "::set-output name=added_codeowner::$ADDED_CODEOWNER"
+          ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk '{print $NF}' | tr -d '@')
+          echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
           echo "Added Codeowner: $ADDED_CODEOWNER"
 
-      - name: Get repository names
-        id: get-repos
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get repository name
+        id: get-repo-name
         run: |
-          OWNER=$(echo "${{ github.repository }}" | cut -d'/' -f1)
-          REPO=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          API_RESPONSE=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$OWNER/$REPO")
-          REPO_NAMES=$(echo "$API_RESPONSE" | jq -r '.forks_url, .source.forks_url' | xargs -n1 basename | paste -sd "," -)
-          echo "::set-output name=repo_names::$REPO_NAMES"
-      
+          REPO_NAME=$(basename ${{ github.repository }})
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+          echo "Repository Name: $REPO_NAME"
+
       - name: Update MAINTAINERS.yaml
-        if: steps.get-line.outputs.added_codeowner != ''
+        if: steps.codeowner.outputs.ADDED_CODEOWNER != ''
         run: |
-          echo "ADDED_CODEOWNER=${{ steps.get-line.outputs.added_codeowner }}" >> $GITHUB_ENV
-          
           echo "Updating MAINTAINERS.yaml with added codeowner"
-          echo "${{ steps.get-line.outputs.added_codeowner }}" > added_codeowner.txt
-      
+          echo "${{ steps.codeowner.outputs.ADDED_CODEOWNER }}" > added_codeowner.txt
+
           echo 'const fs = require("fs");
           const yaml = require("js-yaml");
-      
+
           const addedCodeowner = fs.readFileSync("added_codeowner.txt", "utf8").trim();
           const maintainers = yaml.safeLoad(fs.readFileSync("MAINTAINERS.yaml", "utf8"));
-      
+
           const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
-      
+
           if (!newMaintainer) {
-            const repoNames = process.env.REPO_NAMES.split(",");
+            const repoName = process.env.REPO_NAME;
             const newMaintainer = {
               name: "",
               github: addedCodeowner,
@@ -67,11 +61,11 @@ jobs:
               availableForHire: false,
               company: "",
               isTscMember: false,
-              repos: repoNames
+              repos: [repoName]
             };
-      
+
             maintainers.push(newMaintainer);
-      
+
             const updatedYaml = yaml.safeDump(maintainers);
             fs.writeFileSync("MAINTAINERS.yaml", updatedYaml);
             console.log("MAINTAINERS.yaml updated with new maintainer:", addedCodeowner);
@@ -79,12 +73,10 @@ jobs:
             console.log("Maintainer", addedCodeowner, "already exists in MAINTAINERS.yaml. Skipping update.");
           }
           ' | node -p
-      
+
           cat MAINTAINERS.yaml
-      
+
           rm added_codeowner.txt
-
-
 
       - name: Commit and push changes
         run: |
