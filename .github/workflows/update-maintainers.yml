@@ -1,72 +1,43 @@
-# name: Update MAINTAINERS.yaml
-
-# on:
-#   push:
-#     branches:
-#       - main
-#     paths:
-#       - 'CODEOWNERS'
-
-# jobs:
-#   update-maintainers:
-#     runs-on: ubuntu-latest
-    
-#     steps:
-#       # Check out the repository code
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-
-#       # Get the changed line in CODEOWNERS (only works if one line has changed)
-#       - name: Get changed line
-#         id: get-line
-#         run: echo "::set-output name=line::$(git diff HEAD~1 HEAD -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')"
-      
-#       # Parse GitHub username from the changed line
-#       - name: Parse GitHub username
-#         id: parse-username
-#         run: echo "::set-output name=username::$(echo "${{ steps.get-line.outputs.line }}" | awk '{print $NF}' | tr -d '@')"
-
-#       # Get the user's name from the GitHub API
-#       - name: Get user name
-#         id: get-user
-#         run: |
-#           response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/users/${{ steps.parse-username.outputs.username }}")
-#           echo "::set-output name=name::$(echo $response | jq -r '.name')"
-      
-#       # Update MAINTAINERS.yaml file
-#       - name: Update MAINTAINERS.yaml
-#         run: |
-#           echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
-#           echo "  name: \"${{ steps.get-user.outputs.name }}\"" >> MAINTAINERS.yaml
-#           echo "  maintained_repository: \"<REPO_NAME>\"" >> MAINTAINERS.yaml
-
-#       # Commit changes to the repository
-#       - name: Commit changes
-#         run: |
-#           git config --global user.name "github-actions"
-#           git config --global user.email "github-actions@github.com"
-#           git remote add auth_origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-#           git push auth_origin HEAD:main
-
-name: Test Push
+name: Update MAINTAINERS.yaml
 
 on:
   push:
+    branches:
+      - main
+    paths:
+      - 'CODEOWNERS'
 
 jobs:
-  test-push:
+  update-maintainers:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
-      - name: Dummy commit and push
+
+      - name: Get changed line
+        id: get-line
+        run: echo "::set-output name=line::$(git diff HEAD~1 HEAD -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')"
+
+      - name: Parse GitHub username
+        id: parse-username
+        run: echo "::set-output name=username::$(echo \"${{ steps.get-line.outputs.line }}\" | awk '{print $NF}' | tr -d '@')"
+
+      - name: Get user name
+        id: get-user
+        run: |
+          response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" "https://api.github.com/users/${{ steps.parse-username.outputs.username }}")
+          echo "::set-output name=name::$(echo $response | jq -r '.name')"
+
+      - name: Update MAINTAINERS.yaml
+        run: |
+          echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
+          echo "  name: \"${{ steps.get-user.outputs.name }}\"" >> MAINTAINERS.yaml
+          echo "  maintained_repository: \"<REPO_NAME>\"" >> MAINTAINERS.yaml
+
+      - name: Commit changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          echo "dummy file" > dummy.txt
-          git add dummy.txt
-          git commit -m "Add dummy file"
-          git remote add auth_origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git remote add auth_origin https://${{ github.actor }}:${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}
           git push auth_origin HEAD:main
