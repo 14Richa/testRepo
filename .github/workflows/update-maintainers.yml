@@ -33,11 +33,11 @@ jobs:
 
       - name: Get repository names
         id: get-repos
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.repository }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          OWNER=$(echo "${{ github.repository }}" | cut -d'/' -f1)
-          REPO=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          TOKEN=${{ secrets.GITHUB_TOKEN }}
-
           API_RESPONSE=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$OWNER/$REPO")
           REPO_NAMES=$(echo "$API_RESPONSE" | jq -r '.forks_url, .source.forks_url' | xargs -n1 basename)
           echo "::set-output name=repo_names::$REPO_NAMES"
