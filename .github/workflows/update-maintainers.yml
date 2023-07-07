@@ -28,6 +28,11 @@ jobs:
         id: codeowner
         run: |
           ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk '{print $NF}' | tr -d '@')
+
+          # Check if the added codeowner is not present in the previous CODEOWNERS file
+          PREVIOUS_CODEOWNERS=$(git show origin/${{ github.base_ref }}:CODEOWNERS | grep -v '^#' | awk '{print $NF}' | tr -d '@')
+          ADDED_CODEOWNER=$(echo "$ADDED_CODEOWNER" | grep -Fxv "$PREVIOUS_CODEOWNERS")
+
           echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
           echo "Added Codeowner: $ADDED_CODEOWNER"
 
