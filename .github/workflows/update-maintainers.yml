@@ -1,3 +1,53 @@
+# name: Update MAINTAINERS.yaml
+
+# on:
+#   pull_request:
+#     types: [opened]
+#     paths:
+#       - 'CODEOWNERS'
+
+# jobs:
+#   update-maintainers:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 1
+
+#       - name: Get changed line
+#         id: get-line
+#         run: echo "::set-output name=line::$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')"
+
+#       - name: Parse GitHub username
+#         id: parse-username
+#         run: echo "::set-output name=username::$(echo \"${{ steps.get-line.outputs.line }}\" | awk '{print $NF}' | tr -d '@')"
+
+#       - name: Get committer name
+#         id: get-committer-name
+#         run: |
+#           COMMITTER_NAME=$(git log -1 --pretty=format:'%an')
+#           echo "COMMITTER_NAME=$COMMITTER_NAME" >> $GITHUB_ENV
+#           echo "Committer Name: $COMMITTER_NAME"
+
+#       - name: Update MAINTAINERS.yaml
+#         run: |
+#           echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
+#           echo "  name: '${{ env.COMMITTER_NAME }}'" >> MAINTAINERS.yaml
+#           echo "  maintained_repository: 'testRepo'" >> MAINTAINERS.yaml
+#           cat MAINTAINERS.yaml
+#           echo "MAINTAINERS.yaml updated successfully"
+
+#       - name: Commit and push
+#         run: |
+#           git config user.name "${{ env.COMMITTER_NAME }}"
+#           git config user.email "github-actions@github.com"
+#           git add MAINTAINERS.yaml
+#           git commit -m "update latest maintainers list"
+#           git push https://${{secrets.GITHUB_TOKEN}}@github.com/14Richa/testRepo.git HEAD:${{ github.base_ref }}
+
+
 name: Update MAINTAINERS.yaml
 
 on:
@@ -7,42 +57,46 @@ on:
       - 'CODEOWNERS'
 
 jobs:
-  update-maintainers:
+  update_maintainers:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
-
-      - name: Get changed line
+      
+      - name: Get added or removed line
         id: get-line
-        run: echo "::set-output name=line::$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')"
-
-      - name: Parse GitHub username
-        id: parse-username
-        run: echo "::set-output name=username::$(echo \"${{ steps.get-line.outputs.line }}\" | awk '{print $NF}' | tr -d '@')"
-
-      - name: Get committer name
-        id: get-committer-name
         run: |
-          COMMITTER_NAME=$(git log -1 --pretty=format:'%an')
-          echo "COMMITTER_NAME=$COMMITTER_NAME" >> $GITHUB_ENV
-          echo "Committer Name: $COMMITTER_NAME"
-
-      - name: Update MAINTAINERS.yaml
+          ADDED_LINE=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')
+          REMOVED_LINE=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^-' | grep -v '^-- ')
+          echo "::set-output name=added_line::$ADDED_LINE"
+          echo "::set-output name=removed_line::$REMOVED_LINE"
+          echo "Added Line: $ADDED_LINE"
+          echo "Removed Line: $REMOVED_LINE"
+      
+      - name: Handle new maintainers
+        if: steps.get-line.outputs.added_line != ''
         run: |
-          echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
-          echo "  name: '${{ env.COMMITTER_NAME }}'" >> MAINTAINERS.yaml
-          echo "  maintained_repository: 'testRepo'" >> MAINTAINERS.yaml
-          cat MAINTAINERS.yaml
-          echo "MAINTAINERS.yaml updated successfully"
-
-      - name: Commit and push
+          USERNAME=$(echo "${{ steps.get-line.outputs.added_line }}" | awk '{print $NF}' | tr -d '@')
+          echo "New Maintainer's Username: $USERNAME"
+          # rest of the logic for new maintainer goes here
+      
+      - name: Handle removed maintainers
+        if: steps.get-line.outputs.removed_line != ''
         run: |
-          git config user.name "${{ env.COMMITTER_NAME }}"
+          REMOVED_USERNAME=$(echo "${{ steps.get-line.outputs.removed_line }}" | awk '{print $NF}' | tr -d '@')
+          echo "Removed Maintainer's Username: $REMOVED_USERNAME"
+          # Check if the removed maintainer has other repositories
+          # If yes, remove this repository from their list
+          # If no, remove them from MAINTAINERS.yaml
+          # rest of the logic for removed maintainer goes here
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add MAINTAINERS.yaml
-          git commit -m "update latest maintainers list"
-          git push https://${{secrets.GITHUB_TOKEN}}@github.com/14Richa/testRepo.git HEAD:${{ github.base_ref }}
+          git commit -m "Update MAINTAINERS.yaml"
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/14Richa/testRepo.git HEAD:${{ github.base_ref }}
