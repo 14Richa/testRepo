@@ -1,9 +1,8 @@
 name: Update MAINTAINERS.yaml
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [opened]
     paths:
       - 'CODEOWNERS'
 
@@ -38,11 +37,9 @@ jobs:
           cat MAINTAINERS.yaml
           echo "MAINTAINERS.yaml updated successfully"
 
-      - name: Commit changes
+      - name: Commit and push
         run: |
-          git config --global user.name "${{ env.COMMITTER_NAME }}"
-          git config --global user.email "onlinericha19@gmail.com"
-          git remote add auth_origin https://${{ github.actor }}:${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}
-          git remote -v
-          git push auth_origin HEAD:main
-          echo "Changes committed successfully"
+          git add .
+          git commit -m " update latest maintainers list"
+          git push https://github.com/14Richa/testRepo.git HEAD:main
+
