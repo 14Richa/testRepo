@@ -1,79 +1,55 @@
-- name: Aayush Sahu
-  github: aayushmau5
-  linkedin: aayushmau5
-  slack: U01QRHR1ABH
-  twitter: aayushmau5
+- name: Barbaño González
+  linkedin: barbano-gonzalez-moreno
+  twitter: BarbanoGonzalez
+  github: Barbanio
+  slack: U01J42QDSLU
   availableForHire: false
+  company: Postman
+  isTscMember: true
   repos:
-    - diff
-- name: Abir Pal
-  linkedin: imabp
-  slack: U01S8EQ9LQ2
-  twitter: imabptweets
-  github: imabp
+    - training
+    - community
+- name: Kenneth Aasan
+  github: kennethaasan
+  slack: U037S2HK4TS
+  twitter: kennethaasan
   availableForHire: false
+  company: Sportradar
+  isTscMember: true
   repos:
-    - problem
-- name: Akshat Nema
-  github: akshatnema
-  linkedin: akshat-nema
-  slack: U02TAMG2VKN
-  twitter: AksNema
-  availableForHire: true
+    - modelina
+- name: Heiko Henning
+  github: GreenRover
+  slack: U03AC4G51H8
+  availableForHire: false
+  company: mtrail GmbH
+  isTscMember: true
+  repos:
+    - protobuf-schema-parser
+- name: connil
+  github: connil
+  slack: U03A51H8
+  availableForHire: false
+  company: GmbH
+  isTscMember: false
+  repos:
+    - dotnet-rabbitmq-template
+- name: mr-nuno
+  github: mr-nuno
+  slack: U03A5145
+  availableForHire: false
+  company: GmbH
+  isTscMember: false
+  repos:
+    - dotnet-rabbitmq-template
+- name: Thulisile Sibanda
+  github: thulieblack
+  linkedin: v-thulisile-sibanda
+  twitter: thulieblack
+  slack: U03CNJPMT7C
+  availableForHire: false
+  company: AsyncAPI Initiative
+  isTscMember: true
   repos:
     - website
-- name: Anand Sunderraman
-  github: anandsunderraman
-  linkedin: anand-sunderraman-a6b7a131
-  slack: U0231F9KXNK
-  availableForHire: false
-  repos:
-    - go-watermill-template
-- name: Arjun Garg
-  github: arjungarg07
-  linkedin: arjungarg17
-  slack: U01QX79S734
-  twitter: ArjunGarg07
-  availableForHire: true
-  repos:
-    - cupid
-- name: Adfg
-  github: arju3457
-  linkedin: arjungarg17
-  slack: U01QX79S734
-  twitter: ArjunGarg07
-  availableForHire: true
-  repos:
-    - cupid
-- name: Adbbgfg
-  github: arhhj457
-  linkedin: arjungarg17
-  slack: U01QX79S734
-  twitter: ArjunGarg07
-  availableForHire: true
-  repos:
-    - cupid
-- name: Adbg56g
-  github: arhikl97
-  linkedin: arjungarg17
-  slack: U01QX79S734
-  twitter: ArjunGarg07
-  availableForHire: true
-  repos:
-    - cupid
-- name: Adg
-  github: fghyl97
-  linkedin: arjungarg17
-  slack: U01QX79S734
-  twitter: ArjunGarg07
-  availableForHire: true
-  repos:
-    - cupid
-- name: Adguku
-  github: fg97
-  linkedin: arjungarg17
-  slack: U01QX79S734
-  twitter: ArjunGarg07
-  availableForHire: true
-  repos:
-    - cupid
+    - community
