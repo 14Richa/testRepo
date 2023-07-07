@@ -2,7 +2,7 @@ name: Update MAINTAINERS.yaml
 
 on:
   pull_request:
-    types: [synchronize]
+    types: [opened]
     paths:
       - 'CODEOWNERS'
 
