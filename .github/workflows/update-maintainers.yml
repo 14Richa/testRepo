@@ -42,17 +42,18 @@ jobs:
         if: env.ADDED_CODEOWNER && env.REPO_NAME
         run: |
           echo "Updating MAINTAINERS.yaml with added codeowner"
-
+      
           echo 'const fs = require("fs");
           const yaml = require("js-yaml");
-
+      
+          const addedCodeowner = process.env.ADDED_CODEOWNER;
+          const repoName = process.env.REPO_NAME;
+      
           const maintainers = yaml.safeLoad(fs.readFileSync("MAINTAINERS.yaml", "utf8"));
-
+      
           const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
-
+      
           if (!newMaintainer) {
-            const repoName = process.env.REPO_NAME;
-            const addedCodeowner = process.env.ADDED_CODEOWNER;
             const newMaintainer = {
               name: "",
               github: addedCodeowner,
@@ -62,19 +63,20 @@ jobs:
               isTscMember: false,
               repos: [repoName]
             };
-
+      
             maintainers.push(newMaintainer);
-
+      
             const updatedYaml = yaml.safeDump(maintainers);
             fs.writeFileSync("MAINTAINERS.yaml", updatedYaml);
             console.log("MAINTAINERS.yaml updated with new maintainer:", addedCodeowner);
           } else {
             console.log("Maintainer", addedCodeowner, "already exists in MAINTAINERS.yaml. Skipping update.");
           }
-
+      
           cat MAINTAINERS.yaml
-
+      
           rm added_codeowner.txt
+
 
 
       - name: Commit and push changes
