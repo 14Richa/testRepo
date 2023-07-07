@@ -30,8 +30,13 @@ jobs:
         if: steps.check-maintainers.outputs.new-maintainer == 'true'
         run: |
           USERNAME=$NEW_MAINTAINER
+          echo "Username: $USERNAME"   # Print the username
+          
           USER_DATA=$(curl -s -H "Authorization: token ${{ secrets.PAT }}" "https://api.github.com/users/$USERNAME")
+          echo "User data: $USER_DATA"   # Print the user data
+          
           REPO_NAME=$(git config --get remote.origin.url | rev | cut -d'/' -f1 | rev | cut -d'.' -f1)
+          echo "Repository name: $REPO_NAME"   # Print the repository name
           
           # Update MAINTAINERS.yaml
           echo "$USERNAME:" >> MAINTAINERS.yaml
@@ -44,6 +49,8 @@ jobs:
           git config user.email "github-actions@github.com"
           git add MAINTAINERS.yaml
           git commit -m "Update MAINTAINERS.yaml"
-          git push
+          git push origin HEAD:${{ github.head_ref }}
         env:
           PAT: ${{ secrets.PAT }}
+
+
