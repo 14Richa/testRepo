@@ -23,26 +23,22 @@ jobs:
         id: parse-username
         run: echo "::set-output name=username::$(echo \"${{ steps.get-line.outputs.line }}\" | awk '{print $NF}' | tr -d '@')"
 
-      - name: Get commit info
-        id: get-commit-info
+      - name: Get committer name
+        id: get-committer-name
         run: |
-          commit_sha=$(git rev-parse HEAD)
-          response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/commits/${commit_sha}")
-          echo "::set-output name=response::$(echo $response)"
-          echo "::set-output name=name::$(echo $response | jq -r '.commit.committer.name')"
-          echo "::set-output name=api_error::$(echo $response | jq -r '.message')"
-          echo "Commit SHA: $commit_sha"
-          echo "Committer Name: ${{ steps.get-commit-info.outputs.name }}"
+          committer_name=$(git log -1 --pretty=format:'%an')
+          echo "::set-output name=name::${committer_name}"
+          echo "Committer Name: $committer_name"
 
       - name: Update MAINTAINERS.yaml
         run: |
           echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
-          echo "  name: \"${{ steps.get-commit-info.outputs.name }}\"" >> MAINTAINERS.yaml
+          echo "  name: \"${{ steps.get-committer-name.outputs.name }}\"" >> MAINTAINERS.yaml
           echo "  maintained_repository: \"testRepo\"" >> MAINTAINERS.yaml
 
       - name: Commit changes
         env:
-          GIT_COMMITTER_NAME: ${{ steps.get-commit-info.outputs.name }}
+          GIT_COMMITTER_NAME: ${{ steps.get-committer-name.outputs.name }}
           GIT_COMMITTER_EMAIL: ${{ github.actor }}@users.noreply.github.com
         run: |
           git config --global user.name "$GIT_COMMITTER_NAME"
