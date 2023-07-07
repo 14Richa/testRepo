@@ -31,6 +31,17 @@ jobs:
           echo "::set-output name=added_codeowner::$ADDED_CODEOWNER"
           echo "Added Codeowner: $ADDED_CODEOWNER"
 
+      - name: Get repository names
+        id: get-repos
+        run: |
+          OWNER=$(echo "${{ github.repository }}" | cut -d'/' -f1)
+          REPO=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+          API_RESPONSE=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$OWNER/$REPO")
+          REPO_NAMES=$(echo "$API_RESPONSE" | jq -r '.forks_url, .source.forks_url' | xargs -n1 basename)
+          echo "::set-output name=repo_names::$REPO_NAMES"
+
       - name: Update MAINTAINERS.yaml
         if: steps.get-line.outputs.added_codeowner != ''
         run: |
@@ -46,14 +57,15 @@ jobs:
           const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
 
           if (!newMaintainer) {
+            const repoNames = process.env.REPO_NAMES.split(",");
             const newMaintainer = {
-              name: addedCodeowner,
-              github: "",
+              name: "",
+              github: addedCodeowner,
               slack: "",
               availableForHire: false,
               company: "",
               isTscMember: false,
-              repos: []
+              repos: repoNames
             };
 
             maintainers.push(newMaintainer);
