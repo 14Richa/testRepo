@@ -1,8 +1,95 @@
+# name: Update MAINTAINERS.yaml
+
+# on:
+#   pull_request:
+#     types: [opened]
+#     paths:
+#       - 'CODEOWNERS'
+
+# jobs:
+#   update-maintainers:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+#         with:
+#           fetch-depth: 0
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: '14'
+
+#       - name: Install js-yaml
+#         run: npm install js-yaml@3.14.1
+
+#       - name: Get added codeowner
+#         id: codeowner
+#         run: |
+#           ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | grep -v '^-[^+]' | awk '{print $NF}' | tr -d '@')
+#           echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
+#           echo "Added Codeowner: $ADDED_CODEOWNER"
+
+#       - name: Get repository name
+#         id: get-repo-name
+#         run: |
+#           REPO_NAME=$(basename ${{ github.repository }})
+#           echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+#           echo "Repository Name: $REPO_NAME"
+
+#       - name: Update MAINTAINERS.yaml
+#         if: env.ADDED_CODEOWNER && env.REPO_NAME
+#         run: |
+#           echo "Updating MAINTAINERS.yaml with added codeowner"
+#           echo "${{ steps.codeowner.outputs.ADDED_CODEOWNER }}" > added_codeowner.txt      
+#           echo "const fs = require('fs');
+#           const yaml = require('js-yaml');
+
+#           const addedCodeowner = process.env.ADDED_CODEOWNER;
+
+#           // Skip adding certain users
+#           const excludedUsers = ['asyncapi-bot', 'asyncapi-bot-eve'];
+#           if (excludedUsers.includes(addedCodeowner)) {
+#             console.log('Skipping update for excluded user:', addedCodeowner);
+#             process.exit(0);
+#           }
+
+#           const maintainers = yaml.safeLoad(fs.readFileSync('MAINTAINERS.yaml', 'utf8'));
+#           const repoName = process.env.REPO_NAME;
+
+#           const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
+
+#           if (!newMaintainer) {
+#             const newMaintainer = {
+#               name: '',
+#               github: addedCodeowner,
+#               slack: '',
+#               availableForHire: false,
+#               company: '',
+#               isTscMember: false,
+#               repos: [repoName]
+#             };
+
+#             maintainers.push(newMaintainer);
+
+#             const updatedYaml = yaml.safeDump(maintainers);
+#             fs.writeFileSync('MAINTAINERS.yaml', updatedYaml);
+#             console.log('MAINTAINERS.yaml updated with new maintainer:', addedCodeowner);
+#           } else {
+#             console.log('Maintainer', addedCodeowner, 'already exists in MAINTAINERS.yaml. Skipping update.');
+#           }
+#           " | node
+#           cat MAINTAINERS.yaml
+
+#           rm added_codeowner.txt
+
+
 name: Update MAINTAINERS.yaml
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronized]
     paths:
       - 'CODEOWNERS'
 
@@ -11,25 +98,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout main branch
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          ref: main
+          path: testRepo-main
+
+      - name: Checkout one commit before last one
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+          path: testRepo
+
+      - run: cd testRepo && git checkout HEAD^
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
-
+          
       - name: Install js-yaml
         run: npm install js-yaml@3.14.1
 
-      - name: Get added codeowner
-        id: codeowner
+      - name: Compare files
+        id: compare-files
         run: |
-          ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | grep -v '^-[^+]' | awk '{print $NF}' | tr -d '@')
-          echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
-          echo "Added Codeowner: $ADDED_CODEOWNER"
+          const fs = require('fs');
+          const yaml = require('js-yaml');
+          
+          const main_file = fs.readFileSync('./testRepo-main/CODEOWNERS', 'utf8').split('\n');
+          const pr_file = fs.readFileSync('./testRepo/CODEOWNERS', 'utf8').split('\n');
+
+          const addedCodeowners = main_file.filter(x => !pr_file.includes(x));
+
+          console.log("Added Codeowners: ", addedCodeowners);
+          fs.writeFileSync('added_codeowners.txt', addedCodeowners.join('\n'))
 
       - name: Get repository name
         id: get-repo-name
@@ -37,52 +140,61 @@ jobs:
           REPO_NAME=$(basename ${{ github.repository }})
           echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
           echo "Repository Name: $REPO_NAME"
+          
+      - name: Check if there are added codeowners
+        id: check-codeowners
+        run: |
+          if [ -s added_codeowners.txt ]; then
+            echo "CODEOWNERS_UPDATED=true" >> $GITHUB_ENV
+          else
+            echo "No codeowners were added."
+          fi
 
       - name: Update MAINTAINERS.yaml
-        if: env.ADDED_CODEOWNER && env.REPO_NAME
+        if: env.REPO_NAME && env.CODEOWNERS_UPDATED
         run: |
-          echo "Updating MAINTAINERS.yaml with added codeowner"
-          echo "${{ steps.codeowner.outputs.ADDED_CODEOWNER }}" > added_codeowner.txt      
-          echo "const fs = require('fs');
-          const yaml = require('js-yaml');
+          ADDED_CODEOWNERS=$(cat added_codeowners.txt)
+          for ADDED_CODEOWNER in $ADDED_CODEOWNERS
+          do
+            echo "Updating MAINTAINERS.yaml with added codeowner: $ADDED_CODEOWNER"
+            echo "const fs = require('fs');
+            const yaml = require('js-yaml');
 
-          const addedCodeowner = process.env.ADDED_CODEOWNER;
+            // Skip adding certain users
+            const excludedUsers = ['asyncapi-bot', 'asyncapi-bot-eve'];
+            if (excludedUsers.includes('$ADDED_CODEOWNER')) {
+              console.log('Skipping update for excluded user:', '$ADDED_CODEOWNER');
+              process.exit(0);
+            }
 
-          // Skip adding certain users
-          const excludedUsers = ['asyncapi-bot', 'asyncapi-bot-eve'];
-          if (excludedUsers.includes(addedCodeowner)) {
-            console.log('Skipping update for excluded user:', addedCodeowner);
-            process.exit(0);
-          }
+            const maintainers = yaml.safeLoad(fs.readFileSync('MAINTAINERS.yaml', 'utf8'));
+            const repoName = process.env.REPO_NAME;
 
-          const maintainers = yaml.safeLoad(fs.readFileSync('MAINTAINERS.yaml', 'utf8'));
-          const repoName = process.env.REPO_NAME;
+            const newMaintainer = maintainers.find(maintainer => maintainer.github === '$ADDED_CODEOWNER');
 
-          const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
+            if (!newMaintainer) {
+              const newMaintainer = {
+                name: '',
+                github: '$ADDED_CODEOWNER',
+                slack: '',
+                availableForHire: false,
+                company: '',
+                isTscMember: false,
+                repos: [repoName]
+              };
 
-          if (!newMaintainer) {
-            const newMaintainer = {
-              name: '',
-              github: addedCodeowner,
-              slack: '',
-              availableForHire: false,
-              company: '',
-              isTscMember: false,
-              repos: [repoName]
-            };
+              maintainers.push(newMaintainer);
 
-            maintainers.push(newMaintainer);
-
-            const updatedYaml = yaml.safeDump(maintainers);
-            fs.writeFileSync('MAINTAINERS.yaml', updatedYaml);
-            console.log('MAINTAINERS.yaml updated with new maintainer:', addedCodeowner);
-          } else {
-            console.log('Maintainer', addedCodeowner, 'already exists in MAINTAINERS.yaml. Skipping update.');
-          }
-          " | node
-          cat MAINTAINERS.yaml
-
-          rm added_codeowner.txt
+              const updatedYaml = yaml.safeDump(maintainers);
+              fs.writeFileSync('MAINTAINERS.yaml', updatedYaml);
+              console.log('MAINTAINERS.yaml updated with new maintainer:', '$ADDED_CODEOWNER');
+            } else {
+              console.log('Maintainer', '$ADDED_CODEOWNER', 'already exists in MAINTAINERS.yaml. Skipping update.');
+            }
+            " | node
+            cat MAINTAINERS.yaml
+          done
+          rm added_codeowners.txt
 
 
 
