@@ -39,7 +39,7 @@ jobs:
           
       - name: Configure Git
         run: |
-          git config user.name "${{ env.COMMITTER_NAME }}"
+          git config user.name "14Richa"
           git config user.email "onlinericha19@gmail.com"
 
       - name: Commit and push
