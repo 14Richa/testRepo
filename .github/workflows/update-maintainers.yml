@@ -73,7 +73,6 @@ jobs:
           }
 
           cat MAINTAINERS.yaml
-          ' | node
 
           rm added_codeowner.txt
 
