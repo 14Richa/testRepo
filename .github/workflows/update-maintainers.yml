@@ -27,9 +27,10 @@ jobs:
       - name: Get added line
         id: get-line
         run: |
-          ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk '{print substr($0, index($0,$NF))}' | awk '{$1=""; print $0}' | awk '{$1=$1};1' | awk '{print $NF}' | tr -d '@')
+          ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk -F'@' '{print $NF}' | awk '{print $1}')
           echo "::set-output name=added_codeowner::$ADDED_CODEOWNER"
           echo "Added Codeowner: $ADDED_CODEOWNER"
+
 
       - name: Update MAINTAINERS.yaml
         if: steps.get-codeowner.outputs.added_codeowner != ''
