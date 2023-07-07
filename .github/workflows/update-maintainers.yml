@@ -29,6 +29,8 @@ jobs:
           commit_sha=$(git rev-parse HEAD)
           response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/commits/${commit_sha}")
           echo "::set-output name=name::$(echo $response | jq -r '.commit.committer.name')"
+          echo "Commit SHA: $commit_sha"
+          echo "Committer Name: ${{ steps.get-commit-info.outputs.name }}"
 
       - name: Update MAINTAINERS.yaml
         run: |
@@ -41,5 +43,8 @@ jobs:
           GIT_COMMITTER_NAME: ${{ steps.get-commit-info.outputs.name }}
           GIT_COMMITTER_EMAIL: ${{ github.actor }}@users.noreply.github.com
         run: |
+          git config --global user.name "$GIT_COMMITTER_NAME"
+          git config --global user.email "$GIT_COMMITTER_EMAIL"
           git remote add auth_origin https://${{ github.actor }}:${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}
+          git remote -v
           git push auth_origin HEAD:main
