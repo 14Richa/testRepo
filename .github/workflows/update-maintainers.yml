@@ -34,6 +34,8 @@ jobs:
       - name: Update MAINTAINERS.yaml
         if: steps.get-line.outputs.added_codeowner != ''
         run: |
+          echo "Updating MAINTAINERS.yaml with added codeowner"
+
           echo "${{ steps.get-line.outputs.added_codeowner }}" > added_codeowner.txt
           echo 'const fs = require("fs");
           const yaml = require("js-yaml");
@@ -41,20 +43,27 @@ jobs:
           const addedCodeowner = fs.readFileSync("added_codeowner.txt", "utf8").trim();
           const maintainers = yaml.safeLoad(fs.readFileSync("MAINTAINERS.yaml", "utf8"));
 
-          const newMaintainer = {
-            name: addedCodeowner,
-            github: "",
-            slack: "",
-            availableForHire: false,
-            company: "",
-            isTscMember: false,
-            repos: []
-          };
+          const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
 
-          maintainers.push(newMaintainer);
+          if (!newMaintainer) {
+            const newMaintainer = {
+              name: addedCodeowner,
+              github: "",
+              slack: "",
+              availableForHire: false,
+              company: "",
+              isTscMember: false,
+              repos: []
+            };
 
-          const updatedYaml = yaml.safeDump(maintainers);
-          fs.writeFileSync("MAINTAINERS.yaml", updatedYaml);
+            maintainers.push(newMaintainer);
+
+            const updatedYaml = yaml.safeDump(maintainers);
+            fs.writeFileSync("MAINTAINERS.yaml", updatedYaml);
+            console.log("MAINTAINERS.yaml updated with new maintainer:", addedCodeowner);
+          } else {
+            console.log("Maintainer", addedCodeowner, "already exists in MAINTAINERS.yaml. Skipping update.");
+          }
           ' | node -p
 
           rm added_codeowner.txt
