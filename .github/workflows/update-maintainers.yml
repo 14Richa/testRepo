@@ -44,7 +44,3 @@ jobs:
           git add .
           git commit -m "update latest maintainers list"
           git push git@github.com:14Richa/testRepo.git HEAD:main
-
-
-
-
