@@ -2,7 +2,7 @@ name: Update MAINTAINERS.yaml
 
 on:
   pull_request:
-    types: [opened]
+    types: [synchronize, opened]
     paths:
       - 'CODEOWNERS'
 
@@ -13,6 +13,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Fetch branches
+        run: git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
         
       - name: Check for new maintainers
         id: check-maintainers
@@ -30,7 +33,7 @@ jobs:
           USER_DATA=$(curl -s -H "Authorization: token ${{ secrets.PAT }}" "https://api.github.com/users/$USERNAME")
           REPO_NAME=$(git config --get remote.origin.url | rev | cut -d'/' -f1 | rev | cut -d'.' -f1)
           
-          # Update MAINTAINERS.yaml (assuming you have Twitter handle already or it's manually updated)
+          # Update MAINTAINERS.yaml
           echo "$USERNAME:" >> MAINTAINERS.yaml
           echo "  name: $(echo $USER_DATA | jq -r '.name')" >> MAINTAINERS.yaml
           echo "  github: $USERNAME" >> MAINTAINERS.yaml
