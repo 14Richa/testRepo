@@ -122,14 +122,10 @@ jobs:
 
       - name: Compare files
         id: compare-files
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const yaml = require('js-yaml');
-            
-            const main_file = yaml.load(fs.readFileSync('./testRepo-main/MAINTAINERS.yaml', 'utf8'));
-            const pr_file = yaml.load(fs.readFileSync('./testRepo/MAINTAINERS.yaml', 'utf8'));
+        run: |
+          ADDED_CODEOWNERS=$(diff ./testRepo-main/CODEOWNERS ./testRepo/CODEOWNERS | grep '>')
+          echo "ADDED_CODEOWNERS=$ADDED_CODEOWNERS" >> $GITHUB_ENV
+
 
 
       - name: Get repository name
@@ -142,16 +138,14 @@ jobs:
       - name: Check if there are added codeowners
         id: check-codeowners
         run: |
-          if [ -s added_codeowners.txt ]; then
+          if [ -n "$ADDED_CODEOWNERS" ]; then
             echo "CODEOWNERS_UPDATED=true" >> $GITHUB_ENV
           else
             echo "No codeowners were added."
           fi
-
       - name: Update MAINTAINERS.yaml
         if: env.REPO_NAME && env.CODEOWNERS_UPDATED
         run: |
-          ADDED_CODEOWNERS=$(cat added_codeowners.txt)
           for ADDED_CODEOWNER in $ADDED_CODEOWNERS
           do
             echo "Updating MAINTAINERS.yaml with added codeowner: $ADDED_CODEOWNER"
@@ -192,7 +186,6 @@ jobs:
             " | node
             cat MAINTAINERS.yaml
           done
-          rm added_codeowners.txt
 
 
 
