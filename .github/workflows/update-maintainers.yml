@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
           echo "  name: \"${{ steps.get-user.outputs.name }}\"" >> MAINTAINERS.yaml
-          echo "  maintained_repository: \"<REPO_NAME>\"" >> MAINTAINERS.yaml
+          echo "  maintained_repository: \"testRepo\"" >> MAINTAINERS.yaml
 
       - name: Commit changes
         run: |
