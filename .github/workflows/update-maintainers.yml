@@ -30,10 +30,10 @@ jobs:
       - name: Get user name
         id: get-user
         run: |
-          response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/users/${{ steps.parse-username.outputs.username }}")
+          response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" "https://api.github.com/users/${{ steps.parse-username.outputs.username }}")
           echo "::set-output name=name::$(echo $response | jq -r '.name')"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
 
       # Update MAINTAINERS.yaml file
       - name: Update MAINTAINERS.yaml
