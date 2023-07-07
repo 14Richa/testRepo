@@ -76,9 +76,6 @@ jobs:
 
           cat MAINTAINERS.yaml
 
-          rm added_codeowner.txt
-
-
       - name: Commit and push changes
         run: |
           git config user.name "github-actions"
