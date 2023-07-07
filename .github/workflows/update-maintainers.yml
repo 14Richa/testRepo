@@ -33,8 +33,9 @@ jobs:
       - name: Update MAINTAINERS.yaml
         run: |
           echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
-          echo "  name: \"$COMMITTER_NAME\"" >> MAINTAINERS.yaml
-          echo "  maintained_repository: \"testRepo\"" >> MAINTAINERS.yaml
+          echo "  name: '${{ env.COMMITTER_NAME }}'" >> MAINTAINERS.yaml
+          echo "  maintained_repository: 'testRepo'" >> MAINTAINERS.yaml
+          cat MAINTAINERS.yaml
           echo "MAINTAINERS.yaml updated successfully"
 
       - name: Commit changes
