@@ -52,7 +52,7 @@ jobs:
           const excludedUsers = ['asyncapi-bot', 'asyncapi-bot-eve'];
           if (excludedUsers.includes(addedCodeowner)) {
             console.log('Skipping update for excluded user:', addedCodeowner);
-            return;
+            process.exit(0);
           }
 
           const maintainers = yaml.safeLoad(fs.readFileSync('MAINTAINERS.yaml', 'utf8'));
