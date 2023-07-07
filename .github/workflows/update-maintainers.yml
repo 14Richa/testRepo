@@ -27,7 +27,7 @@ jobs:
       - name: Get added codeowner
         id: codeowner
         run: |
-          ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk '{print $NF}' | tr -d '@')
+          ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | grep -v '^-[^+]' | awk '{print $NF}' | tr -d '@')
           echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
           echo "Added Codeowner: $ADDED_CODEOWNER"
 
