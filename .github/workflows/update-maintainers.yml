@@ -66,6 +66,8 @@ jobs:
           }
           ' | node -p
 
+          cat MAINTAINERS.yaml
+
           rm added_codeowner.txt
 
       - name: Commit and push changes
