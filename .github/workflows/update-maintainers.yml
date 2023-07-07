@@ -28,11 +28,6 @@ jobs:
         id: codeowner
         run: |
           ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk '{print $NF}' | tr -d '@')
-
-          # Check if the added codeowner is not present in the previous CODEOWNERS file
-          PREVIOUS_CODEOWNERS=$(git show origin/${{ github.base_ref }}:CODEOWNERS | grep -v '^#' | awk '{print $NF}' | tr -d '@')
-          ADDED_CODEOWNER=$(echo "$ADDED_CODEOWNER" | grep -Fxv "$PREVIOUS_CODEOWNERS")
-
           echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
           echo "Added Codeowner: $ADDED_CODEOWNER"
 
@@ -55,34 +50,38 @@ jobs:
           const addedCodeowner = fs.readFileSync('added_codeowner.txt', 'utf8').trim();
           const maintainers = yaml.safeLoad(fs.readFileSync('MAINTAINERS.yaml', 'utf8'));
 
-          const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
+          const excludedMaintainers = ['asyncapi-bot-eve', 'asyncapi-bot'];
 
-          if (!newMaintainer) {
-            const repoName = process.env.REPO_NAME;
-            const addedCodeowner = process.env.ADDED_CODEOWNER;
-            const newMaintainer = {
-              name: '',
-              github: addedCodeowner,
-              slack: '',
-              availableForHire: false,
-              company: '',
-              isTscMember: false,
-              repos: [repoName]
-            };
+          if (!excludedMaintainers.includes(addedCodeowner)) {
+            const existingMaintainer = maintainers.find(maintainer => maintainer.github === addedCodeowner);
 
-            maintainers.push(newMaintainer);
+            if (!existingMaintainer) {
+              const repoName = process.env.REPO_NAME;
+              const newMaintainer = {
+                name: '',
+                github: addedCodeowner,
+                slack: '',
+                availableForHire: false,
+                company: '',
+                isTscMember: false,
+                repos: [repoName]
+              };
 
-            const updatedYaml = yaml.safeDump(maintainers);
-            fs.writeFileSync('MAINTAINERS.yaml', updatedYaml);
-            console.log('MAINTAINERS.yaml updated with new maintainer:', addedCodeowner);
+              maintainers.push(newMaintainer);
+
+              const updatedYaml = yaml.safeDump(maintainers);
+              fs.writeFileSync('MAINTAINERS.yaml', updatedYaml);
+              console.log('MAINTAINERS.yaml updated with new maintainer:', addedCodeowner);
+            } else {
+              console.log('Maintainer', addedCodeowner, 'already exists in MAINTAINERS.yaml. Skipping update.');
+            }
           } else {
-            console.log('Maintainer', addedCodeowner, 'already exists in MAINTAINERS.yaml. Skipping update.');
-          }
-          " | node
+            console.log('Codeowner', addedCodeowner, 'is excluded. Skipping update.');
+          }"
+
           cat MAINTAINERS.yaml
 
           rm added_codeowner.txt
-          
 
 
 
