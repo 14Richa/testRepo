@@ -122,17 +122,15 @@ jobs:
 
       - name: Compare files
         id: compare-files
-        run: |
-          const fs = require('fs');
-          const yaml = require('js-yaml');
-          
-          const main_file = fs.readFileSync('./testRepo-main/CODEOWNERS', 'utf8').split('\n');
-          const pr_file = fs.readFileSync('./testRepo/CODEOWNERS', 'utf8').split('\n');
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const yaml = require('js-yaml');
+            
+            const main_file = yaml.load(fs.readFileSync('./testRepo-main/MAINTAINERS.yaml', 'utf8'));
+            const pr_file = yaml.load(fs.readFileSync('./testRepo/MAINTAINERS.yaml', 'utf8'));
 
-          const addedCodeowners = main_file.filter(x => !pr_file.includes(x));
-
-          console.log("Added Codeowners: ", addedCodeowners);
-          fs.writeFileSync('added_codeowners.txt', addedCodeowners.join('\n'))
 
       - name: Get repository name
         id: get-repo-name
