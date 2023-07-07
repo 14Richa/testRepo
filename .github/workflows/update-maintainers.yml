@@ -39,19 +39,19 @@ jobs:
           echo "Repository Name: $REPO_NAME"
 
       - name: Update MAINTAINERS.yaml
-        if: steps.codeowner.outputs.ADDED_CODEOWNER != '' && steps.get-repo-name.outputs.REPO_NAME != ''
+        if: env.ADDED_CODEOWNER && env.REPO_NAME
         run: |
           echo "Updating MAINTAINERS.yaml with added codeowner"
           echo "${{ steps.codeowner.outputs.ADDED_CODEOWNER }}" > added_codeowner.txt
-      
+
           echo 'const fs = require("fs");
           const yaml = require("js-yaml");
-      
+
           const addedCodeowner = fs.readFileSync("added_codeowner.txt", "utf8").trim();
           const maintainers = yaml.safeLoad(fs.readFileSync("MAINTAINERS.yaml", "utf8"));
-      
+
           const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
-      
+
           if (!newMaintainer) {
             const repoName = process.env.REPO_NAME;
             const newMaintainer = {
@@ -63,9 +63,9 @@ jobs:
               isTscMember: false,
               repos: [repoName]
             };
-      
+
             maintainers.push(newMaintainer);
-      
+
             const updatedYaml = yaml.safeDump(maintainers);
             fs.writeFileSync("MAINTAINERS.yaml", updatedYaml);
             console.log("MAINTAINERS.yaml updated with new maintainer:", addedCodeowner);
@@ -73,9 +73,9 @@ jobs:
             console.log("Maintainer", addedCodeowner, "already exists in MAINTAINERS.yaml. Skipping update.");
           }
           ' | node -p
-      
+
           cat MAINTAINERS.yaml
-      
+
           rm added_codeowner.txt
 
 
