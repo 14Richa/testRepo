@@ -26,7 +26,8 @@ jobs:
       - name: Get committer name
         id: get-committer-name
         run: |
-          echo "COMMITTER_NAME=$(git log -1 --pretty=format:'%an')" >> $GITHUB_ENV
+          COMMITTER_NAME=$(git log -1 --pretty=format:'%an')
+          echo "COMMITTER_NAME=$COMMITTER_NAME" >> $GITHUB_ENV
           echo "Committer Name: $COMMITTER_NAME"
 
       - name: Update MAINTAINERS.yaml
