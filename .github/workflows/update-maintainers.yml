@@ -2,161 +2,51 @@ name: Update Maintainers
 
 on:
   push:
+    branches:
+      - main
     paths:
-      - "CODEOWNERS"
+      - 'CODEOWNERS'
 
 jobs:
   update-maintainers:
     runs-on: ubuntu-latest
-
+    
     steps:
+      # Check out the repository code
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Update maintainers
-        uses: actions/github-script@v4
+      # Get the changed line in CODEOWNERS (only works if one line has changed)
+      - name: Get changed line
+        id: get-line
+        run: echo "::set-output name=line::$(git diff HEAD~1 HEAD -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')"
+      
+      # Parse GitHub username from the changed line
+      - name: Parse GitHub username
+        id: parse-username
+        run: echo "::set-output name=username::$(echo "${{ steps.get-line.outputs.line }}" | awk '{print $NF}' | tr -d '@')"
+
+      # Get the user's name from the GitHub API
+      - name: Get user name
+        id: get-user
+        run: |
+          response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/users/${{ steps.parse-username.outputs.username }}")
+          echo "::set-output name=name::$(echo $response | jq -r '.name')"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const { Octokit } = require("@octokit/rest");
-            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-            async function run() {
-              const { data: codeowners } = await octokit.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: "CODEOWNERS",
-              });
+      # Update Maintainers.yaml file
+      - name: Update Maintainers.yaml
+        run: |
+          echo "${{ steps.parse-username.outputs.username }}:" >> Maintainers.yaml
+          echo "  name: \"${{ steps.get-user.outputs.name }}\"" >> Maintainers.yaml
+          echo "  maintained_repository: \"<REPO_NAME>\"" >> Maintainers.yaml
 
-              const maintainers = {};
-              const lines = codeowners.content.split("\n");
-
-              for (const line of lines) {
-                if (line.trim().startsWith("*")) {
-                  const parts = line.trim().split(/\s+/);
-                  const username = parts[1].substring(1);
-                  const repoName = context.repo.repo;
-                  const { data: user } = await octokit.users.getByUsername({
-                    username,
-                  });
-                  const twitter = user.twitter_username;
-                  const name = user.name;
-
-                  if (!maintainers[username]) {
-                    maintainers[username] = { name, twitter, repos: [] };
-                  }
-
-                  if (!maintainers[username].repos.includes(repoName)) {
-                    maintainers[username].repos.push(repoName);
-                  }
-                }
-              }
-
-              const { data: maintainersFile } = await octokit.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: "MAINTAINERS.yaml",
-              });
-
-              const oldMaintainers = YAML.parse(maintainersFile.content);
-              const newMaintainers = { ...oldMaintainers, ...maintainers };
-              const newMaintainersYaml = YAML.stringify(newMaintainers);
-
-              await octokit.repos.createOrUpdateFileContents({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: "MAINTAINERS.yaml",
-                message: "Update maintainers",
-                content: Buffer.from(newMaintainersYaml).toString("base64"),
-                sha: maintainersFile.sha,
-              });
-
-              const affectedUsers = Object.keys(maintainers).map((username) => {
-                const maintainer = maintainers[username];
-                const message = `You have been added as a maintainer for ${repoName}`;
-                const twitterUrl = maintainer.twitter
-                  ? `https://twitter.com/${maintainer.twitter}`
-                  : null;
-
-                return {
-                  username,
-                  name: maintainer.name,
-                  repoName,
-                  message,
-                  twitterUrl,
-                };
-              });
-
-              for (const user of affectedUsers) {
-                await octokit.activity.createNotification({
-                  owner: user.username,
-                  repo: repoName,
-                  subject_type: "Repository",
-                  thread_id: context.payload.repository.id,
-                  reason: "mention",
-                });
-
-                if (user.twitterUrl) {
-                  console.log(
-                    `Notify ${user.name} on Twitter: ${user.twitterUrl}`
-                  );
-                }
-              }
-
-              console.log("Maintainers updated successfully");
-
-              // Check if any maintainers have been removed
-              const oldMaintainerUsernames = Object.keys(oldMaintainers);
-              const newMaintainerUsernames = Object.keys(newMaintainers);
-              const removedMaintainers = oldMaintainerUsernames.filter(
-                (username) => !newMaintainerUsernames.includes(username)
-              );
-
-              for (const username of removedMaintainers) {
-                const maintainer = oldMaintainers[username];
-                if (maintainer.repos.length > 1) {
-                  // Maintainer still has other repositories, do not remove from MAINTAINERS.yaml
-                  continue;
-                }
-
-                // Maintainer has no other repositories, remove from MAINTAINERS.yaml
-                delete newMaintainers[username];
-                const newMaintainersYaml = YAML.stringify(newMaintainers);
-
-                await octokit.repos.createOrUpdateFileContents({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  path: "MAINTAINERS.yaml",
-                  message: "Update maintainers",
-                  content: Buffer.from(newMaintainersYaml).toString("base64"),
-                  sha: maintainersFile.sha,
-                });
-
-                const message = `You have been removed as a maintainer for ${repoName}`;
-                const twitterUrl = maintainer.twitter
-                  ? `https://twitter.com/${maintainer.twitter}`
-                  : null;
-
-                await octokit.activity.createNotification({
-                  owner: username,
-                  repo: repoName,
-                 subject_type:"Repository",
-                  thread_id: context.payload.repository.id,
-                  reason: "mention",
-                });
-
-                if(user.twitterUrl) {
-                  console.log(
-                    `Notify ${maintainer.name} on Twitter: ${twitterUrl}`
-                  );
-                }
-              }
-
-              console.log("Maintainers updated successfully");
-            }
-
-            run().catch((error) => {
-              console.error(error);
-              process.exit(1);
-            });
+      # Commit changes to the repository
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add Maintainers.yaml
+          git commit -m "Update Maintainers.yaml"
+          git push
