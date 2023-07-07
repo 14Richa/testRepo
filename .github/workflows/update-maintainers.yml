@@ -38,10 +38,10 @@ jobs:
         run: |
           OWNER=$(echo "${{ github.repository }}" | cut -d'/' -f1)
           REPO=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-
-          repoNames=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$OWNER/$REPO/forks" | jq -r '.[].full_name')
-          echo "::set-output name=repoNames::$repoNames"
-
+          API_RESPONSE=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$OWNER/$REPO")
+          REPO_NAMES=$(echo "$API_RESPONSE" | jq -r '.forks_url, .source.forks_url' | xargs -n1 basename | paste -sd "," -)
+          echo "::set-output name=repo_names::$REPO_NAMES"
+      
       - name: Update MAINTAINERS.yaml
         if: steps.get-line.outputs.added_codeowner != ''
         run: |
@@ -83,6 +83,7 @@ jobs:
           cat MAINTAINERS.yaml
       
           rm added_codeowner.txt
+
 
 
       - name: Commit and push changes
