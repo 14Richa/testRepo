@@ -14,7 +14,7 @@ jobs:
     steps:
       # Check out the repository code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       # Get the changed line in CODEOWNERS (only works if one line has changed)
       - name: Get changed line
@@ -30,9 +30,9 @@ jobs:
       - name: Get user name
         id: get-user
         run: |
-          response=$(curl -s -H "Authorization: token ${{ secrets.BOT_TOKEN }}" "https://api.github.com/users/${{ steps.parse-username.outputs.username }}")
+          response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/users/${{ steps.parse-username.outputs.username }}")
           echo "::set-output name=name::$(echo $response | jq -r '.name')"
-
+      
       # Update MAINTAINERS.yaml file
       - name: Update MAINTAINERS.yaml
         run: |
@@ -47,4 +47,4 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git add MAINTAINERS.yaml
           git commit -m "Update MAINTAINERS.yaml"
-          git push https://${{ secrets.BOT_TOKEN }}@github.com/14Richa/testRepo.git
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/14Richa/testRepo.git
