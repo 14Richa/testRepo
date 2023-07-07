@@ -34,12 +34,9 @@ jobs:
       - name: Get repository names
         id: get-repos
         env:
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.repository }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          API_RESPONSE=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$OWNER/$REPO")
-          REPO_NAMES=$(echo "$API_RESPONSE" | jq -r '.forks_url, .source.forks_url' | xargs -n1 basename)
+          REPO_NAMES=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/${{ github.repository }}/forks" | jq -r '.[].full_name')
           echo "::set-output name=repo_names::$REPO_NAMES"
 
       - name: Update MAINTAINERS.yaml
