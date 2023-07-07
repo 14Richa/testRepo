@@ -20,6 +20,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14'
+      - name: Install js-yaml
+        run: npm install js-yaml
 
       - name: Get added line
         id: get-line
