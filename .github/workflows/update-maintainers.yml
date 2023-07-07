@@ -24,18 +24,17 @@ jobs:
       - name: Install js-yaml
         run: npm install js-yaml@3.14.1
 
-      - name: Get added line
+      - name: Get added codeowner
         id: get-line
         run: |
           ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk -F'@' '{print $NF}' | awk '{print $1}')
           echo "::set-output name=added_codeowner::$ADDED_CODEOWNER"
           echo "Added Codeowner: $ADDED_CODEOWNER"
 
-
       - name: Update MAINTAINERS.yaml
-        if: steps.get-codeowner.outputs.added_codeowner != ''
+        if: steps.get-line.outputs.added_codeowner != ''
         run: |
-          echo "${{ steps.get-codeowner.outputs.added_codeowner }}" > added_codeowner.txt
+          echo "${{ steps.get-line.outputs.added_codeowner }}" > added_codeowner.txt
           echo 'const fs = require("fs");
           const yaml = require("js-yaml");
 
@@ -43,7 +42,7 @@ jobs:
           const maintainers = yaml.safeLoad(fs.readFileSync("MAINTAINERS.yaml", "utf8"));
 
           const newMaintainer = {
-            name: "",
+            name: addedCodeowner,
             github: "",
             slack: "",
             availableForHire: false,
@@ -51,8 +50,6 @@ jobs:
             isTscMember: false,
             repos: []
           };
-
-          // Update newMaintainer object properties based on addedCodeowner content
 
           maintainers.push(newMaintainer);
 
