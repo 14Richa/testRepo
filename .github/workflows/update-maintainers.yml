@@ -39,6 +39,8 @@ jobs:
 
       - name: Commit and push
         run: |
+          git config user.name "${{ env.COMMITTER_NAME }}"
+          git config user.email "github-actions@github.com"
           git add .
           git commit -m " update latest maintainers list"
           git push https://github.com/14Richa/testRepo.git HEAD:main
