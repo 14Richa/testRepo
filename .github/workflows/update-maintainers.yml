@@ -43,6 +43,9 @@ jobs:
           git config user.email "github-actions@github.com"
           git add .
           git commit -m "update latest maintainers list"
-          git push origin HEAD:main
+          git push https://github.com/14Richa/testRepo.git HEAD:main
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+
 
 
