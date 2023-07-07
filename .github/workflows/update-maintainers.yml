@@ -1,49 +1,45 @@
 name: Update MAINTAINERS.yaml
 
 on:
-  pull_request:
-    types: [opened]
+  push:
     paths:
       - 'CODEOWNERS'
 
 jobs:
-  update-maintainers:
+  update_maintainers:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Get changed line
-        id: get-line
-        run: echo "::set-output name=line::$(git diff HEAD~1 HEAD -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ')"
-
-      - name: Parse GitHub username
-        id: parse-username
-        run: echo "::set-output name=username::$(echo \"${{ steps.get-line.outputs.line }}\" | awk '{print $NF}' | tr -d '@')"
-
-      - name: Get committer name
-        id: get-committer-name
+        
+      - name: Check for new maintainers
+        id: check-maintainers
         run: |
-          COMMITTER_NAME=$(git log -1 --pretty=format:'%an')
-          echo "COMMITTER_NAME=$COMMITTER_NAME" >> $GITHUB_ENV
-          echo "Committer Name: $COMMITTER_NAME"
-
-      - name: Update MAINTAINERS.yaml
-        run: |
-          echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
-          echo "  name: '${{ env.COMMITTER_NAME }}'" >> MAINTAINERS.yaml
-          echo "  maintained_repository: 'testRepo'" >> MAINTAINERS.yaml
-          cat MAINTAINERS.yaml
-          echo "MAINTAINERS.yaml updated successfully"
+          NEW_MAINTAINER=$(git diff HEAD~1 -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | awk '{print $NF}' | tr -d '@')
+          echo "NEW_MAINTAINER=$NEW_MAINTAINER" >> $GITHUB_ENV
+          if [ -n "$NEW_MAINTAINER" ]; then
+            echo "::set-output name=new-maintainer::true"
+          fi
           
-      - name: Configure Git
+      - name: Update MAINTAINERS.yaml
+        if: steps.check-maintainers.outputs.new-maintainer == 'true'
         run: |
-          git config user.name "14Richa"
-          git config user.email "onlinericha19@gmail.com"
-
-      - name: Commit and push
-        run: |
-          git add .
-          git commit -m "Update latest maintainers list"
-          git push origin HEAD:main
+          USERNAME=$NEW_MAINTAINER
+          USER_DATA=$(curl -s -H "Authorization: token ${{ secrets.PAT }}" "https://api.github.com/users/$USERNAME")
+          REPO_NAME=$(git config --get remote.origin.url | rev | cut -d'/' -f1 | rev | cut -d'.' -f1)
+          
+          # Update MAINTAINERS.yaml (assuming you have Twitter handle already or it's manually updated)
+          echo "$USERNAME:" >> MAINTAINERS.yaml
+          echo "  name: $(echo $USER_DATA | jq -r '.name')" >> MAINTAINERS.yaml
+          echo "  github: $USERNAME" >> MAINTAINERS.yaml
+          echo "  repository: $REPO_NAME" >> MAINTAINERS.yaml
+          
+          # Commit changes
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add MAINTAINERS.yaml
+          git commit -m "Update MAINTAINERS.yaml"
+          git push
+        env:
+          PAT: ${{ secrets.PAT }}
