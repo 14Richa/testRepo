@@ -42,12 +42,19 @@ jobs:
         if: env.ADDED_CODEOWNER && env.REPO_NAME
         run: |
           echo "Updating MAINTAINERS.yaml with added codeowner"
-          echo "${{ steps.codeowner.outputs.ADDED_CODEOWNER }}" > added_codeowner.txt
-
+          echo "${{ steps.codeowner.outputs.ADDED_CODEOWNER }}" > added_codeowner.txt      
           echo "const fs = require('fs');
           const yaml = require('js-yaml');
 
           const addedCodeowner = fs.readFileSync('added_codeowner.txt', 'utf8').trim();
+
+          // Skip adding certain users
+          const excludedUsers = ['asyncapi-bot', 'asyncapi-bot-eve'];
+          if (excludedUsers.includes(addedCodeowner)) {
+            console.log('Skipping update for excluded user:', addedCodeowner);
+            process.exit(0);
+          }
+
           const maintainers = yaml.safeLoad(fs.readFileSync('MAINTAINERS.yaml', 'utf8'));
 
           const newMaintainer = maintainers.find(maintainer => maintainer.name === addedCodeowner);
@@ -77,6 +84,7 @@ jobs:
           cat MAINTAINERS.yaml
 
           rm added_codeowner.txt
+
 
 
 
