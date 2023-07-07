@@ -45,6 +45,6 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add MAINTAINERS.yaml
-          git commit -m "Update MAINTAINERS.yaml"
-          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/14Richa/testRepo.git
+          git remote add auth_origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push auth_origin HEAD:main
+
