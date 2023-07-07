@@ -1,4 +1,4 @@
-name: Update Maintainers
+name: Update MAINTAINERS.yaml
 
 on:
   push:
@@ -35,18 +35,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Update Maintainers.yaml file
-      - name: Update Maintainers.yaml
+      # Update MAINTAINERS.yaml file
+      - name: Update MAINTAINERS.yaml
         run: |
-          echo "${{ steps.parse-username.outputs.username }}:" >> Maintainers.yaml
-          echo "  name: \"${{ steps.get-user.outputs.name }}\"" >> Maintainers.yaml
-          echo "  maintained_repository: \"<REPO_NAME>\"" >> Maintainers.yaml
+          echo "${{ steps.parse-username.outputs.username }}:" >> MAINTAINERS.yaml
+          echo "  name: \"${{ steps.get-user.outputs.name }}\"" >> MAINTAINERS.yaml
+          echo "  maintained_repository: \"<REPO_NAME>\"" >> MAINTAINERS.yaml
 
       # Commit changes to the repository
       - name: Commit changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add Maintainers.yaml
-          git commit -m "Update Maintainers.yaml"
+          git add MAINTAINERS.yaml
+          git commit -m "Update MAINTAINERS.yaml"
           git push
