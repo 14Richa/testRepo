@@ -108,8 +108,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: npm install js-yaml
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install js-yaml
+        run: npm install js-yaml@3.14.1
 
       - name: Compare files
         id: compare-files
@@ -118,18 +123,18 @@ jobs:
           script: |
             const fs = require('fs');
             const yaml = require('js-yaml');
-      
+
             const codeowners_file = fs.readFileSync('./CODEOWNERS', 'utf8');
-      
+
             const codeowners = codeowners_file.split('\n')
               .filter(line => line.startsWith('*') || line.startsWith('/'))
               .map(line => line.split(/\s+/)[0])
               .filter((value, index, self) => self.indexOf(value) === index)
               .map(value => value.replace(/^\/|\/$/g, ''));
-      
+
             const maintainers = yaml.load(fs.readFileSync('./MAINTAINERS.yaml', 'utf8'));
             const added_codeowners = codeowners.filter(p => !maintainers.some(p2 => p2.name === p));
-      
+
             if (added_codeowners.length > 0) {
               console.log(`Added code owners: ${added_codeowners}`);
               console.log(`ADDED_CODEOWNERS=${added_codeowners.join(',')}`);
