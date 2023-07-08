@@ -84,122 +84,6 @@
 
 #           rm added_codeowner.txt
 
-
-name: Update MAINTAINERS.yaml
-
-on:
-  pull_request:
-    types: [opened, synchronized]
-    paths:
-      - 'CODEOWNERS'
-
-jobs:
-  update-maintainers:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v2
-        with:
-          ref: main
-          path: main
-
-      - name: Checkout PR branch
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ github.head_ref }}
-          path: pr
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-          
-      - name: Install js-yaml
-        run: npm install js-yaml@3.14.1
-
-      - name: Compare files
-        id: compare-files
-        run: |
-          echo "Contents of ./main/CODEOWNERS:"
-          cat ./main/CODEOWNERS
-          echo "Contents of ./pr/CODEOWNERS:"
-          cat ./pr/CODEOWNERS
-
-          ADDED_CODEOWNERS=$(diff ./main/CODEOWNERS ./pr/CODEOWNERS | grep '>')
-          echo "ADDED_CODEOWNERS=$ADDED_CODEOWNERS" >> $GITHUB_ENV
-
-
-      - name: Get repository name
-        id: get-repo-name
-        run: |
-          REPO_NAME=$(basename ${{ github.repository }})
-          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
-          echo "Repository Name: $REPO_NAME"
-          
-      - name: Check if there are added codeowners
-        id: check-codeowners
-        run: |
-          if [ -n "$ADDED_CODEOWNERS" ]; then
-            echo "CODEOWNERS_UPDATED=true" >> $GITHUB_ENV
-          else
-            echo "No codeowners were added."
-          fi
-
-      - name: Update MAINTAINERS.yaml
-        if: env.REPO_NAME && env.CODEOWNERS_UPDATED
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const yaml = require('js-yaml');
-            const addedCodeOwners = process.env.ADDED_CODEOWNERS.split('\n');
-
-            // Skip adding certain users
-            const excludedUsers = ['asyncapi-bot', 'asyncapi-bot-eve'];
-
-            for (const line of addedCodeOwners) {
-              let addedCodeOwner = line.replace('> ', '').trim(); // Remove "> " from the line start
-              addedCodeOwner = addedCodeOwner.replace('@', ''); // Remove "@" symbol
-
-              if (excludedUsers.includes(addedCodeOwner)) {
-                console.log('Skipping update for excluded user:', addedCodeOwner);
-                continue;
-              }
-
-              const maintainers = yaml.safeLoad(fs.readFileSync('MAINTAINERS.yaml', 'utf8'));
-              const repoName = process.env.REPO_NAME;
-              let newMaintainer = maintainers.find(maintainer => maintainer.github === addedCodeOwner);
-
-              if (!newMaintainer) {
-                newMaintainer = {
-                  name: '',
-                  github: addedCodeOwner,
-                  slack: '',
-                  availableForHire: false,
-                  company: '',
-                  isTscMember: false,
-                  repos: [repoName]
-                };
-
-                maintainers.push(newMaintainer);
-
-                const updatedYaml = yaml.safeDump(maintainers);
-                fs.writeFileSync('MAINTAINERS.yaml', updatedYaml);
-                console.log('MAINTAINERS.yaml updated with new maintainer:', addedCodeOwner);
-              } else {
-                console.log('Maintainer', addedCodeOwner, 'already exists in MAINTAINERS.yaml. Skipping update.');
-              }
-            }
-      - name: Display contents of updated MAINTAINERS.yaml
-        run: cat MAINTAINERS.yaml
-
-
-
-
-
-
-
       # - name: Commit and push changes
       #   run: |
       #     git config user.name "github-actions"
@@ -207,3 +91,42 @@ jobs:
       #     git add MAINTAINERS.yaml
       #     git commit -m "Update MAINTAINERS.yaml"
       #     git push origin HEAD:${{ github.base_ref }}
+
+
+
+name: Update Maintainers
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-maintainers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extract added codeowner and repo name
+        run: |
+          ADDED_CODEOWNER=$(awk '/^AMBASSADOR/ {print $2}' CODEOWNERS)
+          REPO_NAME=$(basename ${{ github.repository }})
+          echo "::set-env name=ADDED_CODEOWNER::$ADDED_CODEOWNER"
+          echo "::set-env name=REPO_NAME::$REPO_NAME"
+
+      - name: Update MAINTAINERS.yaml
+        if: ${{ env.ADDED_CODEOWNER != '' }}
+        run: |
+          echo "Updating MAINTAINERS.yaml..."
+          echo "- name: $ADDED_CODEOWNER" > ./MAINTAINERS.yaml
+          echo "  github: $ADDED_CODEOWNER" >> ./MAINTAINERS.yaml
+          echo "  slack: " >> ./MAINTAINERS.yaml
+          echo "  availableForHire: " >> ./MAINTAINERS.yaml
+          echo "  company: " >> ./MAINTAINERS.yaml
+          echo "  isTscMember: " >> ./MAINTAINERS.yaml
+          echo "  linkedin: " >> ./MAINTAINERS.yaml
+          echo "  twitter: " >> ./MAINTAINERS.yaml
+          echo "  repos:" >> ./MAINTAINERS.yaml
+          echo "    - $REPO_NAME" >> ./MAINTAINERS.yaml
+          cat ./MAINTAINERS.yaml
