@@ -102,15 +102,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
-          path: testRepo-main
+          path: main
 
-      - name: Checkout one commit before last one
+      - name: Checkout PR branch
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2
-          path: testRepo
-
-      - run: cd testRepo && git checkout HEAD^
+          ref: ${{ github.head_ref }}
+          path: pr
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
@@ -123,12 +121,12 @@ jobs:
       - name: Compare files
         id: compare-files
         run: |
-          echo "Contents of ./testRepo-main/CODEOWNERS:"
-          cat ./testRepo-main/CODEOWNERS
-          echo "Contents of ./testRepo/CODEOWNERS:"
-          cat ./testRepo/CODEOWNERS
+          echo "Contents of ./main/CODEOWNERS:"
+          cat ./main/CODEOWNERS
+          echo "Contents of ./pr/CODEOWNERS:"
+          cat ./pr/CODEOWNERS
 
-          ADDED_CODEOWNERS=$(diff ./testRepo-main/CODEOWNERS ./testRepo/CODEOWNERS | grep '>')
+          ADDED_CODEOWNERS=$(diff ./main/CODEOWNERS ./pr/CODEOWNERS | grep '>')
           echo "ADDED_CODEOWNERS=$ADDED_CODEOWNERS" >> $GITHUB_ENV
 
 
