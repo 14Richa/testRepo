@@ -98,8 +98,8 @@ name: Update Maintainers
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - 'CODEOWNERS'
 
 jobs:
   update-maintainers:
@@ -108,26 +108,71 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Extract added codeowner and repo name
-        id: extract
-        run: |
-          ADDED_CODEOWNER=$(awk '/^AMBASSADOR/ {print $2}' CODEOWNERS)
-          REPO_NAME=$(basename ${{ github.repository }})
-          echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
-          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: npm install js-yaml
+
+      - name: Compare files
+        id: compare-files
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const yaml = require('js-yaml');
+      
+            const codeowners_file = fs.readFileSync('./CODEOWNERS', 'utf8');
+      
+            const codeowners = codeowners_file.split('\n')
+              .filter(line => line.startsWith('*') || line.startsWith('/'))
+              .map(line => line.split(/\s+/)[0])
+              .filter((value, index, self) => self.indexOf(value) === index)
+              .map(value => value.replace(/^\/|\/$/g, ''));
+      
+            const maintainers = yaml.load(fs.readFileSync('./MAINTAINERS.yaml', 'utf8'));
+            const added_codeowners = codeowners.filter(p => !maintainers.some(p2 => p2.name === p));
+      
+            if (added_codeowners.length > 0) {
+              console.log(`Added code owners: ${added_codeowners}`);
+              console.log(`ADDED_CODEOWNERS=${added_codeowners.join(',')}`);
+              process.env.ADDED_CODEOWNERS = added_codeowners.join(',');
+            } else {
+              console.log('No new code owners added.');
+              process.env.ADDED_CODEOWNERS = '';
+            }
 
       - name: Update MAINTAINERS.yaml
-        if: ${{ env.ADDED_CODEOWNER != '' }}
-        run: |
-          echo "Updating MAINTAINERS.yaml..."
-          echo "- name: $ADDED_CODEOWNER" > ./MAINTAINERS.yaml
-          echo "  github: $ADDED_CODEOWNER" >> ./MAINTAINERS.yaml
-          echo "  slack: " >> ./MAINTAINERS.yaml
-          echo "  availableForHire: " >> ./MAINTAINERS.yaml
-          echo "  company: " >> ./MAINTAINERS.yaml
-          echo "  isTscMember: " >> ./MAINTAINERS.yaml
-          echo "  linkedin: " >> ./MAINTAINERS.yaml
-          echo "  twitter: " >> ./MAINTAINERS.yaml
-          echo "  repos:" >> ./MAINTAINERS.yaml
-          echo "    - $REPO_NAME" >> ./MAINTAINERS.yaml
-          cat ./MAINTAINERS.yaml
+        if: ${{ env.ADDED_CODEOWNERS != '' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const yaml = require('js-yaml');
+
+            console.log("Updating MAINTAINERS.yaml...");
+
+            // Load MAINTAINERS.yaml
+            const maintainersPath = path.join(process.cwd(), 'MAINTAINERS.yaml');
+            const maintainers = yaml.load(fs.readFileSync(maintainersPath, 'utf8'));
+
+            // Add new code owners to MAINTAINERS.yaml
+            const addedCodeowners = process.env.ADDED_CODEOWNERS.split(',');
+            addedCodeowners.forEach(codeowner => {
+              maintainers.push({
+                name: codeowner,
+                github: codeowner,
+                slack: '',
+                availableForHire: '',
+                company: '',
+                isTscMember: '',
+                linkedin: '',
+                twitter: '',
+                repos: [path.basename(process.env.GITHUB_REPOSITORY)]
+              });
+            });
+
+            // Save MAINTAINERS.yaml
+            fs.writeFileSync(maintainersPath, yaml.dump(maintainers));
+
+            // Print updated MAINTAINERS.yaml
+            console.log(fs.readFileSync(maintainersPath, 'utf8'));
+
