@@ -123,9 +123,13 @@ jobs:
       - name: Compare files
         id: compare-files
         run: |
+          echo "Contents of ./testRepo-main/CODEOWNERS:"
+          cat ./testRepo-main/CODEOWNERS
+          echo "Contents of ./testRepo/CODEOWNERS:"
+          cat ./testRepo/CODEOWNERS
+
           ADDED_CODEOWNERS=$(diff ./testRepo-main/CODEOWNERS ./testRepo/CODEOWNERS | grep '>')
           echo "ADDED_CODEOWNERS=$ADDED_CODEOWNERS" >> $GITHUB_ENV
-
 
 
       - name: Get repository name
