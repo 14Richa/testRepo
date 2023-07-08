@@ -109,11 +109,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Extract added codeowner and repo name
+        id: extract
         run: |
           ADDED_CODEOWNER=$(awk '/^AMBASSADOR/ {print $2}' CODEOWNERS)
           REPO_NAME=$(basename ${{ github.repository }})
-          echo "::set-env name=ADDED_CODEOWNER::$ADDED_CODEOWNER"
-          echo "::set-env name=REPO_NAME::$REPO_NAME"
+          echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
+          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
 
       - name: Update MAINTAINERS.yaml
         if: ${{ env.ADDED_CODEOWNER != '' }}
