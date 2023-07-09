@@ -20,13 +20,12 @@ jobs:
           ADDED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^+' | grep -v '^\+\+ ' | grep -v '^-[^+]' | awk '{print $NF}' | tr -d '@')
           echo "ADDED_CODEOWNER=$ADDED_CODEOWNER" >> $GITHUB_ENV
           echo "Added Codeowner: $ADDED_CODEOWNER"
-
       - name: Get removed codeowners
-        id: removed-codeowner
+        id: removed-codeowners
         run: |
-          REMOVED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^- ' | grep -v '^-- ' | grep -v '^+[^-]' | awk '{print $NF}' | tr -d '@')
+          REMOVED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^- ' | grep -v '^-- ' | grep -v '^+[^-]' | awk '{print substr($NF, 2)}')
           echo "REMOVED_CODEOWNER=$REMOVED_CODEOWNER" >> $GITHUB_ENV
-          echo "Removed Codeowner: $REMOVED_CODEOWNER"
+          echo "Removed Codeowners: $REMOVED_CODEOWNER"
 
       - name: Get repository name
         id: get-repo-name
@@ -88,7 +87,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            console.log("Removing codeowners from MAINTAINERS.yaml")
+            console.log("Removing codeowners from MAINTAINERS.yaml");
             const fs = require('fs');
             const yaml = require('js-yaml');
 
