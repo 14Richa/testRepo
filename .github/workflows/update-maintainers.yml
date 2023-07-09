@@ -77,6 +77,11 @@ jobs:
             } else {
               console.log('Maintainer', addedCodeowner, 'already exists in MAINTAINERS.yaml. Skipping update.');
             }
+      
+      - name: Debug REMOVED_CODEOWNER
+        run: |
+          echo "REMOVED_CODEOWNER: ${{ env.REMOVED_CODEOWNER }}"
+
 
       - name: Remove codeowners from MAINTAINERS.yaml
         if: env.REMOVED_CODEOWNER && env.REPO_NAME
