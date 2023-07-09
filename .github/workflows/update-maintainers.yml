@@ -94,7 +94,7 @@
 
 
 
-name: Compare CODEOWNERS
+name: Check new Codeowners
 
 on:
   push:
@@ -103,6 +103,7 @@ on:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -110,26 +111,24 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
-          path: main
+          path: ./current
 
       - name: Checkout one commit before last one
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
           ref: main
-          path: prev_commit
-
-      - run: cd prev_commit && git checkout HEAD^
+          path: ./prev
+        run: cd ./prev && git checkout HEAD^
 
       - name: Compare files
         id: compare-files
         run: |
-          echo "Contents of main branch CODEOWNERS:"
-          cat ./main/CODEOWNERS
-          echo "Contents of previous commit CODEOWNERS:"
-          cat ./prev_commit/CODEOWNERS
-
-          ADDED_CODEOWNERS=$(diff ./main/CODEOWNERS ./prev_commit/CODEOWNERS | grep '>')
+          echo "Contents of ./current/CODEOWNERS:"
+          cat ./current/CODEOWNERS
+          echo "Contents of ./prev/CODEOWNERS:"
+          cat ./prev/CODEOWNERS
+          ADDED_CODEOWNERS=$(diff ./current/CODEOWNERS ./prev/CODEOWNERS | grep '>' | sed 's/> //g')
           echo "ADDED_CODEOWNERS=$ADDED_CODEOWNERS" >> $GITHUB_ENV
 
       - name: Get repository name
@@ -147,5 +146,3 @@ jobs:
           else
             echo "No codeowners were added."
           fi
-
-
