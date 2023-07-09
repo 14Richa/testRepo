@@ -94,63 +94,48 @@
 
 
 
-name: Check new Codeowners
-
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [closed]
+    paths:
+      - '.github/CODEOWNERS'
 
 jobs:
-  build:
-
+  check:
+    if: github.event.pull_request.merged
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v2
         with:
           ref: main
-          path: ./current
+          path: testRepo-main
 
       - name: Checkout one commit before last one
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
           ref: main
-          path: ./prev
+          path: testRepo
 
-      - name: Go to previous commit
-        run: cd ./prev && git checkout HEAD^
+      - run: cd testRepo && git checkout HEAD^
 
       - name: Compare files
         id: compare-files
-        run: |
-          echo "Contents of ./current/CODEOWNERS:"
-          cat ./current/CODEOWNERS
-          echo "Contents of ./prev/CODEOWNERS:"
-          cat ./prev/CODEOWNERS
-          echo "Diff output:"
-          diff ./current/CODEOWNERS ./prev/CODEOWNERS || true
-          ADDED_CODEOWNERS=$(diff ./current/CODEOWNERS ./prev/CODEOWNERS | grep '>' | sed 's/> //g' || echo "")
-          echo "ADDED_CODEOWNERS:"
-          echo $ADDED_CODEOWNERS
-          echo "ADDED_CODEOWNERS=$ADDED_CODEOWNERS" >> $GITHUB_ENV
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            
+            const main_file = fs.readFileSync('./testRepo-main/.github/CODEOWNERS', 'utf8').split('\n');
+            const pr_file = fs.readFileSync('./testRepo/.github/CODEOWNERS', 'utf8').split('\n');
 
+            let changes = [];
 
+            main_file.forEach((line, i) => {
+                if(line !== pr_file[i]){
+                    changes.push(`Line ${i + 1}: ${line}`);
+                }
+            });
 
-      - name: Get repository name
-        id: get-repo-name
-        run: |
-          REPO_NAME=$(basename ${{ github.repository }})
-          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
-          echo "Repository Name: $REPO_NAME"
-          
-      - name: Check if there are added codeowners
-        id: check-codeowners
-        run: |
-          if [ -n "$ADDED_CODEOWNERS" ]; then
-            echo "CODEOWNERS_UPDATED=true" >> $GITHUB_ENV
-          else
-            echo "No codeowners were added."
-          fi
+            return changes;
