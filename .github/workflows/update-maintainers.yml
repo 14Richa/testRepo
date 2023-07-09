@@ -130,8 +130,13 @@ jobs:
           cat ./current/CODEOWNERS
           echo "Contents of ./prev/CODEOWNERS:"
           cat ./prev/CODEOWNERS
+          echo "Diff output:"
+          diff ./current/CODEOWNERS ./prev/CODEOWNERS
           ADDED_CODEOWNERS=$(diff ./current/CODEOWNERS ./prev/CODEOWNERS | grep '>' | sed 's/> //g')
+          echo "ADDED_CODEOWNERS:"
+          echo $ADDED_CODEOWNERS
           echo "ADDED_CODEOWNERS=$ADDED_CODEOWNERS" >> $GITHUB_ENV
+
 
       - name: Get repository name
         id: get-repo-name
