@@ -23,7 +23,7 @@ jobs:
       - name: Get removed codeowners
         id: removed-codeowners
         run: |
-          REMOVED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^- ' | grep -v '^-- ' | grep -v '^+[^-]' | awk '{print substr($NF, 2)}')
+          REMOVED_CODEOWNER=$(git diff origin/${{ github.base_ref }} -- CODEOWNERS | grep '^-.*@[^[:space:]]*' | awk '{print $NF}')
           echo "REMOVED_CODEOWNER=$REMOVED_CODEOWNER" >> $GITHUB_ENV
           echo "Removed Codeowners: $REMOVED_CODEOWNER"
 
