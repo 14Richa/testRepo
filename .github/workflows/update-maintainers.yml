@@ -119,6 +119,8 @@ jobs:
           fetch-depth: 2
           ref: main
           path: ./prev
+
+      - name: Go to previous commit
         run: cd ./prev && git checkout HEAD^
 
       - name: Compare files
