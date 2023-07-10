@@ -123,6 +123,15 @@ jobs:
           path: testRepo
 
       - run: cd testRepo && git checkout HEAD^
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install js-yaml
+        run: npm install js-yaml@3.14.1
+
 
       - name: Compare CODEOWNERS
         id: compare-codeowners
