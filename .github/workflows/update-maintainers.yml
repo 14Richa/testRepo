@@ -138,18 +138,19 @@ jobs:
               }
               return matches.map(match => match.substr(1));
             }
-
+      
             const mainCodeowners = fs.readFileSync('./testRepo-main/CODEOWNERS', 'utf8');
             const prCodeowners = fs.readFileSync('./testRepo/CODEOWNERS', 'utf8');
-
+      
             const mainUsernames = extractGitHubUsernames(mainCodeowners);
             const prUsernames = extractGitHubUsernames(prCodeowners);
+      
+            const addedUsernames = mainUsernames.filter(username => !prUsernames.includes(username));
+            const removedUsernames = prUsernames.filter(username => !mainUsernames.includes(username));
 
-            const addedUsernames = prUsernames.filter(username => !mainUsernames.includes(username));
-            const removedUsernames = prUsernames.filter(username => !addedUsernames.includes(username) && mainUsernames.includes(username));
-
+      
             console.log('Added Usernames:', addedUsernames);
             console.log('Removed Usernames:', removedUsernames);
-
+      
             console.log(`ADDED_USERNAMES=${addedUsernames.join(', ')}`);
             console.log(`REMOVED_USERNAMES=${removedUsernames.join(', ')}`);
