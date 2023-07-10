@@ -205,7 +205,7 @@ jobs:
             console.log('Updated MAINTAINERS.yaml:', updatedMaintainers);
 
       - name: Commit and push changes
-        working-directory: ./testRepo
+        working-directory: ./testRepo-main
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
