@@ -207,6 +207,9 @@ jobs:
       - name: Commit and push changes
         working-directory: ./testRepo
         run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
           git add .
           git commit -m " Update latest maintainers list"
-          git push https://${{ env.GITHUB_TOKEN }}@github.com/14Richa/testRepo
+          git push
+
