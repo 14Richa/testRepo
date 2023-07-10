@@ -1,95 +1,3 @@
-# name: Verify Maintainers Changes
-
-#        on:
-#   pull_request:
-#     types: [synchronize, opened]
-#     paths:
-#       - "MAINTAINERS.yaml"
-
-# jobs:
-#   verify-changes:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout main branch
-#         uses: actions/checkout@v3
-#         with:
-#           ref: main
-#           path: main-branch
-
-#       - name: Checkout PR branch
-#         uses: actions/checkout@v3
-#         with:
-#           ref: ${{ github.head_ref }}
-#           path: pr-branch
-
-#       - name: Install Dependencies
-#         run: npm install yaml
-
-#       - name: Verify changes in MAINTAINERS.yaml
-#         id: verify-changes
-#         uses: actions/github-script@v5
-#         with:
-#           github-token: ${{ secrets.BOT_TOKEN }}
-#           script: |
-#             const yaml = require("yaml");
-#             const fs = require("fs");
-
-#             const mainFile = yaml.parse(fs.readFileSync("./main-branch/MAINTAINERS.yaml", "utf8"));
-#             const prFile = yaml.parse(fs.readFileSync("./pr-branch/MAINTAINERS.yaml", "utf8"));
-
-#             const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, {github: maintainer.github, repos: maintainer.repos || []}]));
-#             let errorMessages = [];
-
-#             const owner = "${{ github.repository_owner }}";
-#             const repo = "${{ github.event.repository.name }}";
-#             const pull_number = "${{ github.event.pull_request.number }}";
-#             const author = "${{ github.event.pull_request.user.login }}";
-
-#             // If the PR is made by the bot, don't do anything.
-#             if (author === 'async-bot') {
-#               console.log('Changes made by async-bot, skipping verification.');
-#               return;
-#             }
-
-#             function createComment(messages) {
-#                 const commentBody = messages.join('\n');
-#                 github.rest.issues.createComment({ owner, repo, issue_number: pull_number, body: commentBody });
-#             }
-
-#             if (prFile.length < mainFile.length) {
-#               errorMessages.push('A maintainer has been removed from Maintainers.yaml. Please review.');
-#             }
-
-#             for (const maintainer of prFile) {
-#               const previousData = beforeMaintainers.get(maintainer.name);
-#               if (!previousData) {
-#                 errorMessages.push(`A new maintainer, ${maintainer.name}, has been added to Maintainers.yaml. Please review.`);
-#               } else {
-#                 const previousGithub = previousData.github;
-#                 const previousRepos = previousData.repos;
-
-#                 if (previousGithub !== maintainer.github) {
-#                   errorMessages.push(`GitHub key for ${maintainer.name} has been modified in Maintainers.yaml. Please review.`);
-#                 }
-#                 if (JSON.stringify(previousRepos) !== JSON.stringify(maintainer.repos || [])) {
-#                   errorMessages.push(`Repos list for ${maintainer.name} has been modified in Maintainers.yaml. Please review.`);
-#                 }
-#               }
-#             }
-
-#             // If there are any error messages, create a comment on the PR
-#             if (errorMessages.length > 0) {
-#                 createComment(errorMessages);
-
-#                 // Close the PR
-#                 github.rest.pulls.update({
-#                     owner,
-#                     repo,
-#                     pull_number,
-#                     state: 'closed'
-#                 });
-#             }
-
 name: Verify Maintainers Changes
 
 on:
@@ -107,8 +15,8 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v3
         with:
-          ref: master
-          path: community-main
+          ref: main
+          path: main-branch
 
       - name: Checkout PR branch
         uses: actions/checkout@v3
@@ -123,12 +31,12 @@ jobs:
         id: verify-changes
         uses: actions/github-script@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.BOT_TOKEN }}
           script: |
             const yaml = require("yaml");
             const fs = require("fs");
 
-            const mainFile = yaml.parse(fs.readFileSync("./community-main/MAINTAINERS.yaml", "utf8"));
+            const mainFile = yaml.parse(fs.readFileSync("./main-branch/MAINTAINERS.yaml", "utf8"));
             const prFile = yaml.parse(fs.readFileSync("./pr-branch/MAINTAINERS.yaml", "utf8"));
 
             const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, {github: maintainer.github, repos: maintainer.repos || []}]));
@@ -147,7 +55,7 @@ jobs:
 
             // detecting if changes in the PR contain removal of maintainer object 
             if (prFile.length < mainFile.length) {
-              errorMessages.push(`A maintainer has been removed from 'MAINTAINERS.yaml' file. Only 'asyncapi-bot' can make such changes. Maintainers are removed from the file in an automated way only if they are no longer mentioned in 'CODEOWNERS' file in any repo.`);
+              errorMessages.push(`A maintainer has been removed from `MAINTAINERS.yaml` file. Only `asyncapi-bot` can make such changes. Maintainers are removed from the file in an automated way only if they are no longer mentioned in `CODEOWNERS` file in any repo.`);
             }
 
             for (const maintainer of prFile) {
@@ -155,19 +63,24 @@ jobs:
               const previousData = beforeMaintainers.get(maintainer.name);
               // if the maintainer is not found in the previous data, it is a new maintainer 
               if (!previousData) {
-                errorMessages.push(`A new maintainer, ${maintainer.name}, has been added to 'MAINTAINERS.yaml'. Only 'asyncapi-bot' can make such changes. Maintainers are added to the file in an automated way only if they are mentioned in the 'CODEOWNERS' file in any repository.`);
+                errorMessages.push(`A new maintainer, ${maintainer.name}, has been added to MAINTAINERS.yaml. Only asyncapi-bot can make such changes. Maintainers are added to the file in an automated way only if they are mentioned in the CODEOWNERS file in any repository.`);
               } else {
                 // retrieve the previous GitHub key and repositories of the maintainer
                 const previousGithub = previousData.github;
-                const previousRepos = new Set(previousData.repos);
-                const currentRepos = new Set(maintainer.repos || []);
+                const previousRepos = previousData.repos;
                 // check if the GitHub key for the maintainer has been modified
                 if (previousGithub !== maintainer.github) {
-                  errorMessages.push(`GitHub key for ${maintainer.name} has been modified in 'MAINTAINERS.yaml'. Only 'asyncapi-bot' can make such changes. This information is derived from the 'CODEOWNERS' file.`);
+                  errorMessages.push(`GitHub key for ${maintainer.name} has been modified in MAINTAINERS.yaml. Only asyncapi-bot can make such changes. This information is derived from the CODEOWNERS file.`);
                 }
                 // check if the repositories list for the maintainer has been modified
-                if (previousRepos.size !== currentRepos.size || [...previousRepos].some(r => !currentRepos.has(r))) {
-                  errorMessages.push(`Repos list for ${maintainer.name} has been modified in 'MAINTAINERS.yaml'. Only 'asyncapi-bot' can make such changes. This information is derived from the 'CODEOWNERS' file.`);
+                if (previousRepos.toString() !== (maintainer.repos || []).toString()) {
+                  // Check if a human added a repo to the maintainer's repository list
+                  const previousReposLength = previousData.repos.length;
+                  const currentReposLength = (maintainer.repos || []).length;
+                  if (currentReposLength > previousReposLength) {
+                    const addedRepos = (maintainer.repos || []).slice(previousReposLength);
+                    errorMessages.push(`New repositories (${addedRepos.join(', ')}) have been added to ${maintainer.name}'s repository list in MAINTAINERS.yaml. Only asyncapi-bot can make such changes. This information is derived from the CODEOWNERS file.`);
+                  }
                 }
               }
             }
