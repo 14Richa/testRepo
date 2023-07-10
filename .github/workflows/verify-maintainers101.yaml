@@ -89,3 +89,97 @@
 #                     state: 'closed'
 #                 });
 #             }
+
+name: Verify Maintainers Changes
+
+on:
+  pull_request:
+    types: [synchronize, opened]
+    paths:
+      - "MAINTAINERS.yaml"
+
+jobs:
+  verify-changes:
+    # if statement to check if the PR is open.
+    if: github.event.pull_request.state == 'open'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          ref: master
+          path: community-main
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          path: pr-branch
+
+      - name: Install Dependencies
+        run: npm install yaml
+
+      - name: Verify changes in MAINTAINERS.yaml
+        id: verify-changes
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const yaml = require("yaml");
+            const fs = require("fs");
+
+            const mainFile = yaml.parse(fs.readFileSync("./community-main/MAINTAINERS.yaml", "utf8"));
+            const prFile = yaml.parse(fs.readFileSync("./pr-branch/MAINTAINERS.yaml", "utf8"));
+
+            const beforeMaintainers = new Map(mainFile.map((maintainer) => [maintainer.name, {github: maintainer.github, repos: maintainer.repos || []}]));
+            let errorMessages = [];
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pull_number = context.issue.number;
+            const author = context.payload.pull_request.user.login;
+
+            // If the PR is made by the bot, don't do anything.
+            if (author === 'asyncapi-bot') {
+              console.log('Changes made by asyncapi-bot, skipping verification.');
+              return;
+            }
+
+            // detecting if changes in the PR contain removal of maintainer object 
+            if (prFile.length < mainFile.length) {
+              errorMessages.push(`A maintainer has been removed from 'MAINTAINERS.yaml' file. Only 'asyncapi-bot' can make such changes. Maintainers are removed from the file in an automated way only if they are no longer mentioned in 'CODEOWNERS' file in any repo.`);
+            }
+
+            for (const maintainer of prFile) {
+              // retrieve the previous data of the maintainer from the main file
+              const previousData = beforeMaintainers.get(maintainer.name);
+              // if the maintainer is not found in the previous data, it is a new maintainer 
+              if (!previousData) {
+                errorMessages.push(`A new maintainer, ${maintainer.name}, has been added to 'MAINTAINERS.yaml'. Only 'asyncapi-bot' can make such changes. Maintainers are added to the file in an automated way only if they are mentioned in the 'CODEOWNERS' file in any repository.`);
+              } else {
+                // retrieve the previous GitHub key and repositories of the maintainer
+                const previousGithub = previousData.github;
+                const previousRepos = new Set(previousData.repos);
+                const currentRepos = new Set(maintainer.repos || []);
+                // check if the GitHub key for the maintainer has been modified
+                if (previousGithub !== maintainer.github) {
+                  errorMessages.push(`GitHub key for ${maintainer.name} has been modified in 'MAINTAINERS.yaml'. Only 'asyncapi-bot' can make such changes. This information is derived from the 'CODEOWNERS' file.`);
+                }
+                // check if the repositories list for the maintainer has been modified
+                if (previousRepos.size !== currentRepos.size || [...previousRepos].some(r => !currentRepos.has(r))) {
+                  errorMessages.push(`Repos list for ${maintainer.name} has been modified in 'MAINTAINERS.yaml'. Only 'asyncapi-bot' can make such changes. This information is derived from the 'CODEOWNERS' file.`);
+                }
+              }
+            }
+
+            // If there are any error messages, create a comment on the PR and close it
+            if (errorMessages.length > 0) {
+              const commentBody = errorMessages.join('\n');
+              github.rest.issues.createComment({ owner, repo, issue_number: pull_number, body: commentBody });
+              github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number,
+                state: 'closed'
+              });
+            } 
