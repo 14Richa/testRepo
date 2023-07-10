@@ -123,7 +123,7 @@ jobs:
           path: testRepo
 
       - run: cd testRepo && git checkout HEAD^
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -162,7 +162,7 @@ jobs:
             console.log(`REMOVED_USERNAMES=${removedUsernames.join(', ')}`);
 
             // Update MAINTAINERS.yaml
-            const MAINTAINERSFile = './testRepo-main/MAINTAINERS.yaml';
+            const maintainersFile = './testRepo-main/MAINTAINERS.yaml';
             const maintainers = yaml.safeLoad(fs.readFileSync(maintainersFile, 'utf8'));
 
             // Update for added usernames
