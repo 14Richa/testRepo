@@ -203,3 +203,10 @@ jobs:
             const updatedMaintainers = yaml.safeDump(maintainers);
             fs.writeFileSync(maintainersFile, updatedMaintainers);
             console.log('Updated MAINTAINERS.yaml:', updatedMaintainers);
+
+      - name: Commit and push changes
+        working-directory: ./testRepo
+        run: |
+          git add .
+          git commit -m " Update latest maintainers list"
+          git push https://${{ env.GITHUB_TOKEN }}@github.com/14Richa/testRepo
