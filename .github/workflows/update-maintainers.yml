@@ -133,7 +133,7 @@ jobs:
           }
 
           const mainCodeowners = fs.readFileSync('CODEOWNERS', 'utf8');
-          const prCodeowners = fs.readFileSync('.git/refs/remotes/origin/${{ github.event.pull_request.head.ref }}', 'utf8');
+          const prCodeowners = fs.readFileSync(`${{ github.workspace }}/CODEOWNERS`, 'utf8');
 
           const mainUsernames = extractGitHubUsernames(mainCodeowners);
           const prUsernames = extractGitHubUsernames(prCodeowners);
