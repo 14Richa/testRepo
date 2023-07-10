@@ -126,33 +126,31 @@ jobs:
 
       - name: Compare CODEOWNERS
         id: compare-codeowners
-        run: |
-          const fs = require('fs');
-          const mainCodeowners = fs.readFileSync('./testRepo-main/CODEOWNERS', 'utf8');
-          const prCodeowners = fs.readFileSync('./testRepo/CODEOWNERS', 'utf8');
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
 
-          const mainUsernames = parseCodeowners(mainCodeowners);
-          const prUsernames = parseCodeowners(prCodeowners);
-
-          const addedUsernames = prUsernames.filter(username => !mainUsernames.includes(username));
-          const removedUsernames = mainUsernames.filter(username => !prUsernames.includes(username));
-
-          console.log('Added Usernames:', addedUsernames);
-          console.log('Removed Usernames:', removedUsernames);
-
-          console.log(`ADDED_USERNAMES=${addedUsernames.join(', ')}`);
-          console.log(`REMOVED_USERNAMES=${removedUsernames.join(', ')}`);
-
-      - name: Parse CODEOWNERS
-        id: parse-codeowners
-        run: |
-          function parseCodeowners(content) {
-            const regex = /@([a-zA-Z0-9_-]+)/g;
-            const matches = content.matchAll(regex);
-            const usernames = [];
-            for (const match of matches) {
-              usernames.push(match[1]);
+            function extractGitHubUsernames(content) {
+              const regex = /@([a-zA-Z0-9_-]+)/g;
+              const matches = content.match(regex);
+              if (!matches) {
+                return [];
+              }
+              return matches.map(match => match.substr(1));
             }
-            return usernames;
-          }
 
+            const mainCodeowners = fs.readFileSync('./testRepo-main/CODEOWNERS', 'utf8');
+            const prCodeowners = fs.readFileSync('./testRepo/CODEOWNERS', 'utf8');
+
+            const mainUsernames = extractGitHubUsernames(mainCodeowners);
+            const prUsernames = extractGitHubUsernames(prCodeowners);
+
+            const addedUsernames = prUsernames.filter(username => !mainUsernames.includes(username));
+            const removedUsernames = mainUsernames.filter(username => !prUsernames.includes(username));
+
+            console.log('Added Usernames:', addedUsernames);
+            console.log('Removed Usernames:', removedUsernames);
+
+            console.log(`ADDED_USERNAMES=${addedUsernames.join(', ')}`);
+            console.log(`REMOVED_USERNAMES=${removedUsernames.join(', ')}`);
