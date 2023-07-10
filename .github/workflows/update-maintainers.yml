@@ -178,11 +178,7 @@ jobs:
               const existingMaintainer = maintainers.find(maintainer => maintainer.github === username);
               if (!existingMaintainer) {
                 maintainers.push({
-                  name: '',
                   github: username,
-                  slack: '',
-                  availableForHire: false,
-                  company: '',
                   isTscMember: false,
                   repos: [repoName]
                 });
