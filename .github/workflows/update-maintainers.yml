@@ -113,37 +113,44 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
-          fetch-depth: 0
+          path: testRepo-main
 
-      - name: Fetch pull request branch
-        run: git fetch origin ${{ github.event.pull_request.head.ref }} --depth=1
+      - name: Checkout one commit before last one
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+          ref: main
+          path: testRepo
 
-      - name: Compare Codeowners
+      - run: cd testRepo && git checkout HEAD^
+
+      - name: Compare CODEOWNERS
         id: compare-codeowners
-        run: |
-          const fs = require('fs');
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
 
-          function extractGitHubUsernames(content) {
-            const regex = /@([a-zA-Z0-9_-]+)/g;
-            const matches = content.match(regex);
-            if (!matches) {
-              return [];
+            function extractGitHubUsernames(content) {
+              const regex = /@([a-zA-Z0-9_-]+)/g;
+              const matches = content.match(regex);
+              if (!matches) {
+                return [];
+              }
+              return matches.map(match => match.substr(1));
             }
-            return matches.map(match => match.substr(1));
-          }
 
-          const mainCodeowners = fs.readFileSync('CODEOWNERS', 'utf8');
-          const prCodeowners = fs.readFileSync(`${{ github.workspace }}/CODEOWNERS`, 'utf8');
+            const mainCodeowners = fs.readFileSync('./testRepo-main/CODEOWNERS', 'utf8');
+            const prCodeowners = fs.readFileSync('./testRepo/CODEOWNERS', 'utf8');
 
-          const mainUsernames = extractGitHubUsernames(mainCodeowners);
-          const prUsernames = extractGitHubUsernames(prCodeowners);
+            const mainUsernames = extractGitHubUsernames(mainCodeowners);
+            const prUsernames = extractGitHubUsernames(prCodeowners);
 
-          const addedUsernames = prUsernames.filter(username => !mainUsernames.includes(username));
-          const removedUsernames = mainUsernames.filter(username => !prUsernames.includes(username));
+            const addedUsernames = prUsernames.filter(username => !mainUsernames.includes(username));
+            const removedUsernames = mainUsernames.filter(username => !prUsernames.includes(username));
 
-          console.log('Added Usernames:', addedUsernames);
-          console.log('Removed Usernames:', removedUsernames);
+            console.log('Added Usernames:', addedUsernames);
+            console.log('Removed Usernames:', removedUsernames);
 
-          console.log(`ADDED_USERNAMES=${addedUsernames.join(', ')}`);
-          console.log(`REMOVED_USERNAMES=${removedUsernames.join(', ')}`);
-
+            console.log(`ADDED_USERNAMES=${addedUsernames.join(', ')}`);
+            console.log(`REMOVED_USERNAMES=${removedUsernames.join(', ')}`);
