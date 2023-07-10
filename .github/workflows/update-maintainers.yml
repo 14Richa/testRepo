@@ -113,35 +113,37 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: main
+          fetch-depth: 0
+
+      - name: Fetch pull request branch
+        run: git fetch origin ${{ github.event.pull_request.head.ref }} --depth=1
 
       - name: Compare Codeowners
         id: compare-codeowners
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-  
-            function extractGitHubUsernames(content) {
-              const regex = /@([a-zA-Z0-9_-]+)/g;
-              const matches = content.match(regex);
-              if (!matches) {
-                return [];
-              }
-              return matches.map(match => match.substr(1));
+        run: |
+          const fs = require('fs');
+
+          function extractGitHubUsernames(content) {
+            const regex = /@([a-zA-Z0-9_-]+)/g;
+            const matches = content.match(regex);
+            if (!matches) {
+              return [];
             }
-  
-            const previousCodeowners = fs.readFileSync('CODEOWNERS', 'utf8');
-            const latestCodeowners = fs.readFileSync(process.env.GITHUB_WORKSPACE + '/CODEOWNERS', 'utf8');
-  
-            const previousUsernames = extractGitHubUsernames(previousCodeowners);
-            const latestUsernames = extractGitHubUsernames(latestCodeowners);
-  
-            const addedUsernames = latestUsernames.filter(username => !previousUsernames.includes(username));
-            const removedUsernames = previousUsernames.filter(username => !latestUsernames.includes(username));
-  
-            console.log('Added Usernames:', addedUsernames);
-            console.log('Removed Usernames:', removedUsernames);
-  
-            console.log(`ADDED_USERNAMES=${addedUsernames.join(', ')}`);
-            console.log(`REMOVED_USERNAMES=${removedUsernames.join(', ')}`);
-  
+            return matches.map(match => match.substr(1));
+          }
+
+          const mainCodeowners = fs.readFileSync('CODEOWNERS', 'utf8');
+          const prCodeowners = fs.readFileSync('.git/refs/remotes/origin/${{ github.event.pull_request.head.ref }}', 'utf8');
+
+          const mainUsernames = extractGitHubUsernames(mainCodeowners);
+          const prUsernames = extractGitHubUsernames(prCodeowners);
+
+          const addedUsernames = prUsernames.filter(username => !mainUsernames.includes(username));
+          const removedUsernames = mainUsernames.filter(username => !prUsernames.includes(username));
+
+          console.log('Added Usernames:', addedUsernames);
+          console.log('Removed Usernames:', removedUsernames);
+
+          console.log(`ADDED_USERNAMES=${addedUsernames.join(', ')}`);
+          console.log(`REMOVED_USERNAMES=${removedUsernames.join(', ')}`);
+
