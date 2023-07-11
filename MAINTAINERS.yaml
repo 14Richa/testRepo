@@ -42,6 +42,7 @@
   isTscMember: false
   repos:
     - dotnet-rabbitmq-template
+    
 - name: Thulisile Sibanda
   github: thulieblack
   linkedin: v-thulisile-sibanda
