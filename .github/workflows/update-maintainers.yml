@@ -123,14 +123,3 @@ jobs:
             const updatedMaintainers = yaml.safeDump(maintainers);
             fs.writeFileSync(maintainersFile, updatedMaintainers);
             console.log('Updated MAINTAINERS.yaml:', updatedMaintainers);
-
-      - name: Commit and push changes
-        uses: EndBug/add-and-commit@v7
-        with:
-          author_name: "14Richa"
-          author_email: "onlinericha19@gmail.com"
-          message: "Update MAINTAINERS.yaml"
-          add: "testRepo-main/MAINTAINERS.yaml"
-          default_author: github_actions
-          push: true
-        working-directory: testRepo-main
