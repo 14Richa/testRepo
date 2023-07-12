@@ -133,3 +133,4 @@ jobs:
           add: "testRepo-main/MAINTAINERS.yaml"
           default_author: github_actions
           push: true
+        working-directory: testRepo-main
