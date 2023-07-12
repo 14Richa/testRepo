@@ -77,10 +77,13 @@ jobs:
         id: update-maintainers
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.BOT_TOKEN }}
+          result: ${{ steps.compare-codeowners.outputs.result }}
           script: |
             const fs = require('fs');
             const yaml = require('js-yaml');
-            const { added: addedUsernames, removed: removedUsernames } = JSON.parse(core.getInput('result'));
+            const result = JSON.parse(process.env.RESULT);
+            const { added: addedUsernames, removed: removedUsernames } = result;
 
             // Get repository name
             const repoName = process.env.REPO_NAME;
