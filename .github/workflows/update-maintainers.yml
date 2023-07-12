@@ -131,5 +131,5 @@ jobs:
           author_email: "onlinericha19@gmail.com"
           message: "Update MAINTAINERS.yaml"
           add: "testRepo-main/MAINTAINERS.yaml"
-          default_author: 14Richa
+          default_author: github_actions
           push: true
